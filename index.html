@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dinge Radio</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--sand:#ddd0b3;--dune:#b8a07a;--tide:#4a8a9e;--deep:#0e2233;--deeper:#091929;--sky:#7ec8d8;--foam:#f0ece0;--amber:#c97d3a;--green:#7aab8e;--purple:#8a7ab4;--teal:#4a9e8e;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{font-family:'DM Sans',sans-serif;background:var(--deeper);color:var(--foam);min-height:100vh;}
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
+.bg-gradient{position:absolute;inset:0;background:linear-gradient(180deg,#071420 0%,#0e2233 45%,#1a3a50 75%,#0e2233 100%);}
+.shimmer{position:absolute;inset:0;background-image:radial-gradient(1px 1px at 15% 20%,rgba(255,255,255,.15) 0%,transparent 100%),radial-gradient(1px 1px at 45% 35%,rgba(255,255,255,.1) 0%,transparent 100%),radial-gradient(1px 1px at 70% 15%,rgba(255,255,255,.12) 0%,transparent 100%);animation:shimmerPulse 8s ease-in-out infinite alternate;}
+@keyframes shimmerPulse{0%{opacity:.6}100%{opacity:1}}
+.wave-container{position:absolute;bottom:0;left:0;width:100%;height:35%;}
+.wave{position:absolute;bottom:0;left:-100%;width:300%;}
+.wave svg{width:100%;}
+.wave1{animation:waveMove 18s linear infinite;opacity:.10;}
+.wave2{animation:waveMove 26s linear infinite reverse;opacity:.07;bottom:8px;}
+.wave3{animation:waveMove 34s linear infinite;opacity:.05;bottom:16px;}
+@keyframes waveMove{0%{transform:translateX(0)}100%{transform:translateX(33.33%)}}
+.app{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:24px 20px 60px;}
+.header{text-align:center;margin-bottom:20px;animation:fadeUp 1s ease both;}
+.station-eyebrow{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:5px;text-transform:uppercase;color:var(--sky);opacity:.6;margin-bottom:6px;}
+h1{font-family:'Playfair Display',serif;font-size:clamp(28px,6vw,52px);font-weight:400;letter-spacing:-1px;line-height:1;}
+h1 em{font-style:italic;color:var(--sky);}
+.tagline{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--dune);margin-top:5px;opacity:.6;}
+.tabs{display:flex;gap:6px;margin-bottom:20px;animation:fadeUp 1s ease .1s both;}
+.tab{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:7px 16px;border-radius:20px;border:1px solid rgba(255,255,255,.1);background:transparent;color:rgba(240,236,224,.5);cursor:pointer;transition:all .2s;}
+.tab:hover{border-color:rgba(126,200,216,.3);color:var(--sky);}
+.tab.active{background:rgba(126,200,216,.15);border-color:rgba(126,200,216,.4);color:var(--sky);}
+.panel{width:100%;max-width:720px;display:none;animation:fadeUp .4s ease both;}
+.panel.active{display:block;}
+.player-card{background:rgba(14,34,51,.78);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(126,200,216,.13);border-radius:20px;padding:26px 30px;box-shadow:0 32px 80px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.05);margin-bottom:16px;}
+.np-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--sky);opacity:.55;margin-bottom:3px;}
+.block-name{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;color:var(--foam);margin-bottom:2px;transition:all .5s;}
+.block-time-str{font-family:'DM Mono',monospace;font-size:11px;color:var(--dune);opacity:.65;margin-bottom:10px;}
+.block-sfeer{font-size:12px;line-height:1.65;color:rgba(240,236,224,.6);margin-bottom:14px;min-height:36px;}
+.mood-bar{height:3px;border-radius:2px;margin-bottom:18px;transition:background 1.2s ease;}
+.controls{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+.btn-play{width:50px;height:50px;border-radius:50%;border:2px solid var(--sky);background:rgba(126,200,216,.08);color:var(--sky);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;}
+.btn-play:hover{background:rgba(126,200,216,.18);transform:scale(1.05);}
+.btn-play.playing{background:var(--sky);color:var(--deep);}
+.source-info{flex:1;min-width:0;}
+.source-name{font-size:13px;font-weight:500;color:var(--foam);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.source-type{font-family:'DM Mono',monospace;font-size:10px;color:var(--dune);opacity:.55;margin-top:2px;}
+.btn-next{width:30px;height:30px;border-radius:50%;border:1px solid rgba(255,255,255,.1);background:transparent;color:rgba(240,236,224,.5);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;}
+.btn-next:hover{border-color:rgba(126,200,216,.3);color:var(--sky);}
+.volume-row{display:flex;align-items:center;gap:10px;}
+.vol-icon{font-size:12px;color:var(--dune);opacity:.5;width:14px;text-align:center;}
+input[type=range]{-webkit-appearance:none;flex:1;height:3px;background:rgba(255,255,255,.1);border-radius:2px;outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--sky);cursor:pointer;transition:transform .15s;}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.25);}
+.vol-pct{font-family:'DM Mono',monospace;font-size:10px;color:var(--dune);opacity:.45;width:28px;text-align:right;flex-shrink:0;}
+.divider{height:1px;background:rgba(255,255,255,.06);margin:16px 0;}
+.sched-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--dune);opacity:.45;margin-bottom:10px;}
+.schedule-grid{display:flex;gap:5px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;}
+.schedule-grid::-webkit-scrollbar{display:none;}
+.sched-block{flex-shrink:0;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);cursor:pointer;transition:all .2s;min-width:75px;}
+.sched-block:hover{background:rgba(126,200,216,.08);border-color:rgba(126,200,216,.2);}
+.sched-block.active{background:rgba(126,200,216,.12);border-color:rgba(126,200,216,.35);}
+.sched-block.override{border-color:var(--amber)!important;background:rgba(201,125,58,.1)!important;}
+.sched-time{font-family:'DM Mono',monospace;font-size:9px;color:var(--sky);opacity:.7;margin-bottom:2px;}
+.sched-name{font-size:10px;color:var(--foam);opacity:.75;line-height:1.3;}
+.bottom-row{display:flex;justify-content:space-between;align-items:center;margin-top:14px;}
+.clock{font-family:'DM Mono',monospace;font-size:13px;color:var(--sky);opacity:.45;letter-spacing:2px;}
+.badges{display:flex;gap:5px;align-items:center;}
+.badge{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;padding:3px 8px;border-radius:10px;border:1px solid rgba(126,200,216,.2);color:var(--sky);opacity:.45;text-transform:uppercase;}
+.badge.manual{border-color:rgba(201,125,58,.4);color:var(--amber);opacity:.8;}
+.badge.live{border-color:rgba(122,171,142,.4);color:var(--green);opacity:.8;animation:livePulse 2s ease infinite;}
+.badge.speech{border-color:rgba(240,192,64,.4);color:#f0c040;opacity:.9;animation:livePulse 1s ease infinite;}
+@keyframes livePulse{0%,100%{opacity:.5}50%{opacity:1}}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--green);display:inline-block;margin-right:4px;animation:livePulse 2s ease infinite;}
+.stem-card{background:rgba(14,34,51,.6);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:16px 20px;margin-bottom:16px;}
+.stem-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--dune);opacity:.6;margin-bottom:10px;}
+.stem-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+.stem-btn{padding:7px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(240,236,224,.7);font-size:12px;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;}
+.stem-btn:hover{border-color:rgba(126,200,216,.3);color:var(--sky);}
+.stem-btn.active{background:rgba(126,200,216,.12);border-color:rgba(126,200,216,.4);color:var(--sky);}
+.stem-test{display:flex;align-items:center;gap:10px;margin-top:4px;}
+.btn-small{padding:6px 14px;border-radius:8px;border:1px solid rgba(126,200,216,.3);background:transparent;color:var(--sky);font-size:11px;cursor:pointer;font-family:'DM Mono',monospace;letter-spacing:1px;transition:all .2s;}
+.btn-small:hover{background:rgba(126,200,216,.1);}
+.beheer-section{margin-bottom:24px;}
+.beheer-day{font-family:'Playfair Display',serif;font-size:18px;color:var(--foam);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.08);}
+.msg-item{background:rgba(14,34,51,.5);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:12px 16px;margin-bottom:8px;border-left:3px solid var(--sky);transition:opacity .2s;}
+.msg-item.activiteit{border-left-color:var(--amber);}
+.msg-item.sluiting{border-left-color:var(--green);}
+.msg-item.afsluiting{border-left-color:var(--purple);}
+.msg-item.zwemclub{border-left-color:var(--dune);}
+.msg-item.alfacollege{border-left-color:var(--teal);}
+.msg-item.disabled{opacity:.35;}
+.msg-item-header{display:flex;align-items:center;gap:10px;margin-bottom:0;}
+.msg-time-badge{font-family:'DM Mono',monospace;font-size:11px;color:var(--sky);flex-shrink:0;}
+.msg-title{font-size:12px;font-weight:500;color:var(--foam);flex:1;}
+.msg-actions{display:flex;gap:5px;flex-shrink:0;}
+.btn-icon{width:28px;height:28px;border-radius:6px;border:1px solid rgba(255,255,255,.1);background:transparent;color:rgba(240,236,224,.5);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.btn-icon:hover{border-color:rgba(126,200,216,.3);color:var(--sky);}
+.btn-icon.aan{background:rgba(122,171,142,.15);border-color:rgba(122,171,142,.4);color:var(--green);}
+.btn-icon.danger:hover{border-color:rgba(200,80,80,.4);color:#e08080;}
+.msg-text-preview{font-size:11.5px;line-height:1.6;color:rgba(240,236,224,.55);margin-top:8px;display:none;}
+.msg-text-preview.open{display:block;}
+.msg-edit-area{width:100%;margin-top:8px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px;color:var(--foam);font-size:12px;line-height:1.6;font-family:'DM Sans',sans-serif;resize:vertical;min-height:80px;display:none;}
+.msg-edit-area.open{display:block;}
+.msg-edit-row{display:flex;gap:8px;margin-top:6px;display:none;}
+.msg-edit-row.open{display:flex;}
+.new-msg-card{background:rgba(14,34,51,.5);border:1px dashed rgba(126,200,216,.2);border-radius:12px;padding:16px 20px;margin-top:16px;}
+.new-msg-card h4{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--sky);margin-bottom:14px;}
+.form-row{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+.fg{display:flex;flex-direction:column;gap:4px;flex:1;min-width:110px;}
+.fg label{font-size:10px;color:var(--dune);opacity:.6;font-family:'DM Mono',monospace;letter-spacing:1px;text-transform:uppercase;}
+.fg select,.fg input[type=time],.fg input[type=text]{background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:7px 10px;color:var(--foam);font-size:12px;font-family:'DM Sans',sans-serif;outline:none;}
+.fg textarea{background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px 10px;color:var(--foam);font-size:12px;font-family:'DM Sans',sans-serif;resize:vertical;min-height:70px;outline:none;}
+.btn-primary{padding:8px 20px;border-radius:8px;border:none;background:var(--sky);color:var(--deep);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;}
+.btn-primary:hover{background:#a0d8e8;}
+.ann-banner{position:fixed;top:0;left:0;right:0;background:rgba(9,25,41,.98);border-bottom:2px solid var(--amber);padding:14px 24px;z-index:200;transform:translateY(-100%);transition:transform .4s ease;}
+.ann-banner.show{transform:translateY(0);}
+.ann-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--amber);margin-bottom:5px;}
+.ann-text{font-size:13px;line-height:1.6;color:var(--foam);}
+.ann-bar{height:2px;background:var(--amber);margin-top:10px;border-radius:1px;}
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(16px);background:rgba(9,25,41,.96);border:1px solid rgba(126,200,216,.25);color:var(--foam);font-size:12px;padding:9px 20px;border-radius:30px;opacity:0;transition:all .35s ease;pointer-events:none;white-space:nowrap;z-index:300;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+/* PIN OVERLAY */
+.pin-overlay{position:fixed;inset:0;background:rgba(7,20,32,.97);z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;animation:fadeUp .3s ease;}
+.pin-overlay.hidden{display:none;}
+.pin-box{background:rgba(14,34,51,.9);border:1px solid rgba(126,200,216,.2);border-radius:16px;padding:32px 36px;text-align:center;max-width:320px;width:90%;}
+.pin-title{font-family:'Playfair Display',serif;font-size:22px;color:var(--foam);margin-bottom:6px;}
+.pin-sub{font-size:12px;color:var(--dune);opacity:.6;margin-bottom:20px;}
+.pin-dots{display:flex;gap:10px;justify-content:center;margin-bottom:20px;}
+.pin-dot{width:12px;height:12px;border-radius:50%;border:2px solid rgba(126,200,216,.4);background:transparent;transition:all .2s;}
+.pin-dot.filled{background:var(--sky);border-color:var(--sky);}
+.pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;}
+.pin-btn{padding:14px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:var(--foam);font-size:18px;font-family:'DM Mono',monospace;cursor:pointer;transition:all .2s;}
+.pin-btn:hover{background:rgba(126,200,216,.15);border-color:rgba(126,200,216,.3);}
+.pin-btn:active{transform:scale(.95);}
+.pin-error{font-size:12px;color:#e08080;font-family:'DM Mono',monospace;min-height:16px;}
+/* GELUID KEUZE */
+.geluid-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+.geluid-btn{padding:8px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(240,236,224,.7);font-size:12px;cursor:pointer;transition:all .2s;}
+.geluid-btn:hover{border-color:rgba(126,200,216,.3);color:var(--sky);}
+.geluid-btn.active{background:rgba(126,200,216,.12);border-color:rgba(126,200,216,.4);color:var(--sky);}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:500px){.player-card{padding:18px 14px}.form-row{flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="bg">
+  <div class="bg-gradient"></div><div class="shimmer"></div>
+  <div class="wave-container">
+    <div class="wave wave1"><svg viewBox="0 0 1200 80" preserveAspectRatio="none"><path d="M0,40 C150,10 350,70 600,40 C850,10 1050,70 1200,40 L1200,80 L0,80 Z" fill="#4a8a9e"/></svg></div>
+    <div class="wave wave2"><svg viewBox="0 0 1200 60" preserveAspectRatio="none"><path d="M0,30 C200,5 400,55 600,30 C800,5 1000,55 1200,30 L1200,60 L0,60 Z" fill="#7ec8d8"/></svg></div>
+    <div class="wave wave3"><svg viewBox="0 0 1200 50" preserveAspectRatio="none"><path d="M0,25 C250,5 450,45 700,25 C900,5 1100,45 1200,25 L1200,50 L0,50 Z" fill="#1a3a50"/></svg></div>
+  </div>
+</div>
+<!-- PIN OVERLAY -->
+<div class="pin-overlay hidden" id="pin-overlay">
+  <div class="pin-box">
+    <div class="pin-title">Dinge <em style="color:var(--sky);font-style:italic;">Radio</em></div>
+    <div class="pin-sub" id="pin-sub">Voer de pincode in om verder te gaan</div>
+    <div class="pin-dots" id="pin-dots">
+      <div class="pin-dot" id="pd0"></div>
+      <div class="pin-dot" id="pd1"></div>
+      <div class="pin-dot" id="pd2"></div>
+      <div class="pin-dot" id="pd3"></div>
+    </div>
+    <div class="pin-grid">
+      <button class="pin-btn" onclick="pinToets('1')">1</button>
+      <button class="pin-btn" onclick="pinToets('2')">2</button>
+      <button class="pin-btn" onclick="pinToets('3')">3</button>
+      <button class="pin-btn" onclick="pinToets('4')">4</button>
+      <button class="pin-btn" onclick="pinToets('5')">5</button>
+      <button class="pin-btn" onclick="pinToets('6')">6</button>
+      <button class="pin-btn" onclick="pinToets('7')">7</button>
+      <button class="pin-btn" onclick="pinToets('8')">8</button>
+      <button class="pin-btn" onclick="pinToets('9')">9</button>
+      <button class="pin-btn" onclick="pinToets('')" style="font-size:14px;color:var(--dune);">—</button>
+      <button class="pin-btn" onclick="pinToets('0')">0</button>
+      <button class="pin-btn" onclick="pinWis()" style="font-size:14px;">⌫</button>
+    </div>
+    <div class="pin-error" id="pin-error"></div>
+  </div>
+</div>
+
+<div class="ann-banner" id="ann-banner">
+  <div class="ann-label">📢 Omroepbericht</div>
+  <div class="ann-text" id="ann-text"></div>
+  <div class="ann-bar" id="ann-bar" style="width:100%"></div>
+</div>
+<div class="app">
+  <div class="header">
+    <div class="station-eyebrow">◈ Waddenkust · Hefshuizen ◈</div>
+    <h1>Dinge <em>Radio</em></h1>
+    <div class="tagline">Vitaliteitspark De Dinge Hefshuizen</div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('speler')">▶ Speler</button>
+    <button class="tab" onclick="showTab('muziek')">🎵 Muziek</button>
+    <button class="tab" onclick="showTab('stem')">🎙 Stem</button>
+    <button class="tab" onclick="showTab('beheer')">⚙ Beheer</button>
+  </div>
+  <!-- SPELER -->
+  <div class="panel active" id="panel-speler">
+    <div class="player-card">
+      <div class="np-label">Nu actief</div>
+      <div class="block-name" id="block-name">—</div>
+      <div class="block-time-str" id="block-time-str">—</div>
+      <div class="block-sfeer" id="block-sfeer">Even geduld…</div>
+      <div class="mood-bar" id="mood-bar"></div>
+      <div class="controls">
+        <button class="btn-play" id="btn-play" onclick="togglePlay()">▶</button>
+        <div class="source-info">
+          <div class="source-name" id="source-name">Klik ▶ om te starten</div>
+          <div class="source-type" id="source-type">—</div>
+        </div>
+        <button class="btn-next" onclick="nextSource()">⇥</button>
+      </div>
+      <div class="volume-row">
+        <span class="vol-icon">♩</span>
+        <input type="range" id="volume" min="0" max="100" value="60" oninput="setVolume(this.value)">
+        <span class="vol-pct" id="vol-pct">60%</span>
+      </div>
+      <div class="divider"></div>
+      <div class="sched-label">Dagschema — klik om over te schakelen</div>
+      <div class="schedule-grid" id="schedule-grid"></div>
+      <div class="bottom-row">
+        <span class="clock" id="clock">00:00:00</span>
+        <div class="badges">
+          <span class="badge live"><span class="live-dot"></span>LIVE</span>
+          <span class="badge" id="mode-badge">AUTO</span>
+          <span class="badge speech" id="speech-badge" style="display:none">📢 OMROEP</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- MUZIEK -->
+  <div class="panel" id="panel-muziek">
+    <div class="stem-card">
+      <div class="stem-label">Muziekkeuze per dagblok</div>
+      <div style="font-size:12px;color:rgba(240,236,224,.55);margin-bottom:14px;line-height:1.6;">Kies per blok een zender uit de lijst. De keuze geldt direct — ook als de muziek al speelt. Gebruik dit voor speciale dagen zoals de Zwemvierdaagse, feestdagen of andere gelegenheden.</div>
+      <div id="muziek-blokken"></div>
+    </div>
+  </div>
+  <!-- STEM -->
+  <div class="panel" id="panel-stem">
+    <div class="stem-card">
+      <div class="stem-label">Kies een Nederlandse stem</div>
+      <div class="stem-grid" id="stem-grid"><div style="font-size:12px;color:rgba(240,236,224,.4);font-style:italic;">Stemmen worden geladen…</div></div>
+      <div class="stem-test">
+        <button class="btn-small" onclick="testStem()">▶ Test stem</button>
+        <span style="font-size:11px;color:rgba(240,236,224,.4);font-family:'DM Mono',monospace;" id="stem-status">Geen stem geselecteerd</span>
+      </div>
+    </div>
+    <div class="stem-card">
+      <div class="stem-label">Stem instellingen</div>
+      <div class="form-row">
+        <div class="fg"><label>Spreeksnelheid</label><input type="range" id="speech-rate" min="0.7" max="1.3" step="0.05" value="0.95" oninput="updateSpeechSettings()"></div>
+        <div class="fg"><label>Toonhoogte</label><input type="range" id="speech-pitch" min="0.5" max="1.5" step="0.1" value="1.0" oninput="updateSpeechSettings()"></div>
+        <div class="fg"><label>Volume stem</label><input type="range" id="speech-volume" min="0.5" max="1.0" step="0.05" value="0.95" oninput="updateSpeechSettings()"></div>
+      </div>
+    </div>
+  </div>
+  <!-- BEHEER -->
+  <div class="panel" id="panel-beheer">
+    <div id="beheer-content"></div>
+    <div class="new-msg-card" style="margin-bottom:16px;">
+      <h4>🔔 Geluidseffect voor boodschappen</h4>
+      <div class="geluid-grid" id="geluid-grid">
+        <button class="geluid-btn active" onclick="kiesGeluid('plingplong',this)">🔔 Pling-plong</button>
+        <button class="geluid-btn" onclick="kiesGeluid('plons',this)">💧 Plons</button>
+        <button class="geluid-btn" onclick="kiesGeluid('scheepshoorn',this)">🚢 Scheepshoorn</button>
+        <button class="geluid-btn" onclick="kiesGeluid('meeuw',this)">🐦 Meeuw</button>
+        <button class="geluid-btn" onclick="kiesGeluid('geen',this)">🔇 Geen geluid</button>
+      </div>
+      <div style="margin-top:10px;">
+        <button class="btn-small" onclick="speelGeluid(geluidsKeuze)">▶ Test huidig geluid</button>
+      </div>
+    </div>
+    <div class="new-msg-card" style="margin-bottom:16px;">
+      <h4>🔐 Pincode wijzigen</h4>
+      <div class="form-row">
+        <div class="fg"><label>Huidige pincode</label><input type="password" id="pin-oud" maxlength="4" placeholder="••••"></div>
+        <div class="fg"><label>Nieuwe pincode (4 cijfers)</label><input type="password" id="pin-nieuw" maxlength="4" placeholder="••••"></div>
+      </div>
+      <button class="btn-small" onclick="wijzigPIN()" style="margin-top:4px;">Pincode wijzigen</button>
+      <span style="font-size:11px;color:rgba(240,236,224,.4);margin-left:10px;font-family:'DM Mono',monospace;">Standaard: 1234</span>
+    </div>
+      <h4>+ Nieuw bericht toevoegen</h4>
+      <div class="form-row">
+        <div class="fg"><label>Dag</label>
+          <select id="new-dag"><option value="ma">Maandag</option><option value="di">Dinsdag</option><option value="wo">Woensdag</option><option value="do">Donderdag</option><option value="vr">Vrijdag</option><option value="za">Zaterdag</option><option value="zo">Zondag</option><option value="dagelijks">Dagelijks</option></select>
+        </div>
+        <div class="fg"><label>Tijdstip</label><input type="time" id="new-tijd" value="12:00"></div>
+        <div class="fg"><label>Type</label>
+          <select id="new-type"><option value="">Algemeen</option><option value="activiteit">Activiteit</option><option value="sluiting">Sluiting</option><option value="afsluiting">Afsluiting</option><option value="zwemclub">Zwemclub</option></select>
+        </div>
+      </div>
+      <div class="fg" style="margin-bottom:10px;"><label>Titel</label><input type="text" id="new-titel" placeholder="bijv. Speciale aankondiging"></div>
+      <div class="fg" style="margin-bottom:12px;"><label>Boodschap (wordt voorgelezen)</label><textarea id="new-tekst" placeholder="Typ hier de tekst…"></textarea></div>
+      <button class="btn-primary" onclick="voegToe()">+ Toevoegen</button>
+      <button class="btn-small" style="margin-left:10px;" onclick="wisOpslag()">↺ Herstel origineel</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<audio id="audio-el" style="display:none" crossorigin="anonymous"></audio>
+<script>
+const WD=[
+  {id:'opbouw',name:'Opbouw & voorbereiding',shortName:'Opbouw',timeLabel:'06:30 – 07:00',startH:6,startM:30,endH:7,endM:0,sfeer:'Rustig opstarten voor het personeel.',moodColor:'linear-gradient(to right,#5a8a7e,#7aab8e)',sources:[{name:'Groove Salad Classic · SomaFM',type:'Rustige downtempo',streamUrl:'https://ice1.somafm.com/gsclassic-128-mp3'},{name:'Lush · SomaFM',type:'Atmosferische texturen',streamUrl:'https://ice1.somafm.com/lush-128-mp3'}]},
+  {id:'vroeg',name:'Vroege ochtend — baantjeszwemmers',shortName:'Baantjes',timeLabel:'07:00 – 10:30',startH:7,startM:0,endH:10,endM:30,sfeer:'Helder en fris. Focus-ondersteunende muziek voor de vroege zwemmer.',moodColor:'linear-gradient(to right,#3a7a9e,#7ec8d8)',sources:[{name:'Groove Salad Classic · SomaFM',type:'Rustige downtempo',streamUrl:'https://ice1.somafm.com/gsclassic-128-mp3'},{name:'Groove Salad · SomaFM',type:'Chillout beats',streamUrl:'https://ice1.somafm.com/groovesalad-128-mp3'}]},
+  {id:'stille-ochtend',name:'Stille ochtend',shortName:'Stilte',timeLabel:'10:30 – 12:00',startH:10,startM:30,endH:12,endM:0,sfeer:'Meest meditatief moment. Zachte atmosferische muziek.',moodColor:'linear-gradient(to right,#3a6e5a,#7aab8e)',sources:[{name:'Lush · SomaFM',type:'Atmosferische texturen',streamUrl:'https://ice1.somafm.com/lush-128-mp3'},{name:'Groove Salad Classic · SomaFM',type:'Rustige downtempo',streamUrl:'https://ice1.somafm.com/gsclassic-128-mp3'}]},
+  {id:'middag',name:'Opbouw middag',shortName:'Middag',timeLabel:'12:00 – 13:30',startH:12,startM:0,endH:13,endM:30,sfeer:'Zomers vakantiegevoel voor een mooie zwembadmiddag.',moodColor:'linear-gradient(to right,#8a6a2a,#c97d3a)',sources:[{name:'Beat Blender · SomaFM',type:'Chill beats · zomerse sfeer',streamUrl:'https://ice1.somafm.com/beatblender-128-mp3'},{name:'Groove Salad · SomaFM',type:'Downtempo',streamUrl:'https://ice1.somafm.com/groovesalad-128-mp3'}]},
+  {id:'namiddag',name:'Namiddagdip',shortName:'Rustig',timeLabel:'13:30 – 14:45',startH:13,startM:30,endH:14,endM:45,sfeer:'Rustiger moment. Terugval naar ontspannen sfeer.',moodColor:'linear-gradient(to right,#4a7a6a,#7aab8e)',sources:[{name:'Groove Salad Classic · SomaFM',type:'Rustige downtempo',streamUrl:'https://ice1.somafm.com/gsclassic-128-mp3'},{name:'Beat Blender · SomaFM',type:'Lichte chill beats',streamUrl:'https://ice1.somafm.com/beatblender-128-mp3'}]},
+  {id:'piek',name:'Schoolkinderen — piekuur',shortName:'Piek',timeLabel:'14:45 – 16:45',startH:14,startM:45,endH:16,endM:45,sfeer:'Drukste moment. Wat meer energie — vrolijk voor alle leeftijden.',moodColor:'linear-gradient(to right,#9a6020,#d4943a)',sources:[{name:'Beat Blender · SomaFM',type:'Upbeat chill beats',streamUrl:'https://ice1.somafm.com/beatblender-128-mp3'},{name:'Groove Salad · SomaFM',type:'Levendiger downtempo',streamUrl:'https://ice1.somafm.com/groovesalad-128-mp3'}]},
+  {id:'zwemles',name:'Zwemlessen',shortName:'Zwemles',timeLabel:'16:45 – 18:30',startH:16,startM:45,endH:18,endM:30,sfeer:'Geen muziek — communicatie centraal. Optioneel: zachte achtergrond.',moodColor:'linear-gradient(to right,#2a5a6e,#4a8a9e)',isZwemles:true,sources:[{name:'Lush · SomaFM (zacht)',type:'Atmosferisch · optioneel',streamUrl:'https://ice1.somafm.com/lush-128-mp3'},{name:'— Stille modus —',type:'Geen muziek',streamUrl:null}]},
+  {id:'avond',name:'Avondzwemmen',shortName:'Avond',timeLabel:'18:30 – 19:45',startH:18,startM:30,endH:19,endM:45,sfeer:'Dag loopt ten einde. Rustiger en atmosferischer.',moodColor:'linear-gradient(to right,#3a3a7e,#7a7ab4)',sources:[{name:'Groove Salad Classic · SomaFM',type:'Rustige avondsfeer',streamUrl:'https://ice1.somafm.com/gsclassic-128-mp3'},{name:'Lush · SomaFM',type:'Atmosferische avond',streamUrl:'https://ice1.somafm.com/lush-128-mp3'}]},
+  {id:'nacht',name:'Na sluitingstijd',shortName:'Nacht',timeLabel:'19:45 – 06:30',startH:19,startM:45,endH:30,endM:0,sfeer:'Continue achtergrondambient.',moodColor:'linear-gradient(to right,#1a2a3e,#2a3a5e)',isNacht:true,sources:[{name:'Drone Zone · SomaFM',type:'Diep ambient',streamUrl:'https://ice1.somafm.com/dronezone-128-mp3'},{name:'Lush · SomaFM',type:'Nachtsfeer',streamUrl:'https://ice1.somafm.com/lush-128-mp3'}]},
+];
+const WE=[
+  {id:'we-voor',name:'Voor opening',shortName:'Gesloten',timeLabel:'00:00 – 11:00',startH:0,startM:0,endH:11,endM:0,sfeer:'Bad gesloten.',moodColor:'linear-gradient(to right,#1a2a3e,#2a3a5e)',sources:[{name:'Drone Zone · SomaFM',type:'Diep ambient',streamUrl:'https://ice1.somafm.com/dronezone-128-mp3'}]},
+  {id:'we-ochtend',name:'Weekendochtend',shortName:'Opening',timeLabel:'11:00 – 13:00',startH:11,startM:0,endH:13,endM:0,sfeer:'Rustig opstarten van het weekend.',moodColor:'linear-gradient(to right,#3a7a9e,#7ec8d8)',sources:[{name:'Groove Salad Classic · SomaFM',type:'Rustige downtempo',streamUrl:'https://ice1.somafm.com/gsclassic-128-mp3'},{name:'Lush · SomaFM',type:'Ochtendsfeer',streamUrl:'https://ice1.somafm.com/lush-128-mp3'}]},
+  {id:'we-middag',name:'Weekendmiddag',shortName:'Middag',timeLabel:'13:00 – 15:30',startH:13,startM:0,endH:15,endM:30,sfeer:'Drukte op zijn hoogtepunt. Zomerse vakantiesfeer.',moodColor:'linear-gradient(to right,#8a6a2a,#c97d3a)',sources:[{name:'Beat Blender · SomaFM',type:'Chill beats · zomers',streamUrl:'https://ice1.somafm.com/beatblender-128-mp3'},{name:'Groove Salad · SomaFM',type:'Downtempo',streamUrl:'https://ice1.somafm.com/groovesalad-128-mp3'}]},
+  {id:'we-namiddag',name:'Weekendnamiddag',shortName:'Rustig',timeLabel:'15:30 – 17:00',startH:15,startM:30,endH:17,endM:0,sfeer:'Afbouwen richting sluiting.',moodColor:'linear-gradient(to right,#4a7a6a,#7aab8e)',sources:[{name:'Groove Salad Classic · SomaFM',type:'Rustige downtempo',streamUrl:'https://ice1.somafm.com/gsclassic-128-mp3'},{name:'Beat Blender · SomaFM',type:'Lichte chill',streamUrl:'https://ice1.somafm.com/beatblender-128-mp3'}]},
+  {id:'we-na',name:'Na sluitingstijd',shortName:'Nacht',timeLabel:'17:00 – 00:00',startH:17,startM:0,endH:30,endM:0,sfeer:'Bad gesloten. Continue ambient.',moodColor:'linear-gradient(to right,#1a2a3e,#2a3a5e)',sources:[{name:'Drone Zone · SomaFM',type:'Diep ambient',streamUrl:'https://ice1.somafm.com/dronezone-128-mp3'},{name:'Lush · SomaFM',type:'Avondsfeer',streamUrl:'https://ice1.somafm.com/lush-128-mp3'}]},
+];
+let BERICHTEN=[
+  {id:'sid-1',dag:'dagelijks',uur:8,min:0,titel:'Station-ID ochtend',type:'',enabled:true,tekst:'U luistert naar Dinge Radio — een internetzender met rechtenvrije achtergrondmuziek voor de baden van Stichting Zwembaden Eemsmond, en voor iedereen die er thuis ook van wil genieten. Mede mogelijk gemaakt door Univé Noord-Nederland en Sportcentrum De Oude Fabriek uit Uithuizermeeden.'},
+  {id:'sid-2',dag:'dagelijks',uur:14,min:0,titel:'Station-ID middag',type:'',enabled:true,tekst:'Dinge Radio — de sfeer van De Dinge Hefshuizen, de Waddenkust en Noordzee, waar u ook bent. Mede mogelijk gemaakt door Univé Noord-Nederland en Sportcentrum De Oude Fabriek uit Uithuizermeeden.'},
+  {id:'ma-1',dag:'ma',uur:9,min:55,titel:'Yoga Tessa',type:'activiteit',enabled:true,tekst:'Attentie alstublieft. Over een paar minuten zal het Dingestrand worden gesloten voor bezoekers. Op het Dingestrand wordt een yogales gegeven door Tessa van Sportcentrum De Oude Fabriek. Vindt u het interessant om een keer mee te doen? Vraag dan om meer informatie bij de kassa. Vanaf 11:00 uur is het Dingestrand weer voor iedereen geopend. Deelnemers worden verzocht zich te verzamelen in de Zwembar, zodat Tessa met de deelnemers de les alvast kan voorbereiden.'},
+  {id:'ma-2',dag:'ma',uur:16,min:30,titel:'Aankondiging sluiting + avond',type:'sluiting',enabled:true,tekst:'Attentie alstublieft. Over een kwartier, om 16:45, sluiten wij de baden om ons voor te bereiden op de zwemlessen. Wilt u straks het water verlaten en ook de ligweide en het terras opruimen? Voor blikjes en flesjes zijn er aparte statiegeldbakken beschikbaar. Vanavond is het zwembad vanaf 18:30 gereserveerd voor leden van Zwemclub De Dinge — publiek zwemmen is maandagavond helaas niet mogelijk. Wel is er vanavond van alles te doen op ons terrein: Jasper staat klaar met Bootcamp, Annelijn met Pilates en Luciën met Kickboksen — allemaal van Sportcentrum De Oude Fabriek. Meer weten? Vraag het bij de kassa. Wij zijn dinsdagochtend om 07:00 uur weer gewoon voor iedereen open. Tot morgen!'},
+  {id:'ma-3',dag:'ma',uur:16,min:45,titel:'Definitieve sluiting',type:'sluiting',enabled:true,tekst:'Beste aanwezigen, de baden worden nu gesloten voor de zwemlessen. Wilt u alstublieft het water, de ligweides en het terras verlaten? Hartelijk dank voor uw bezoek aan De Dinge Hefshuizen — we zien u graag morgen of een andere keer terug.'},
+  {id:'ma-4',dag:'ma',uur:18,min:15,titel:'Welkom Zwemclub',type:'zwemclub',enabled:true,tekst:'Welkom bij Zwemclub De Dinge. De baden zijn vanaf 18:30 uitsluitend voor u beschikbaar tot 21:00 uur. Wij wensen u een fijne training.'},
+  {id:'ma-5',dag:'ma',uur:18,min:55,titel:'Activiteiten De Oude Fabriek',type:'activiteit',enabled:true,tekst:'Attentie alstublieft. Over een paar minuten starten de avondactiviteiten van onze partner Sportcentrum De Oude Fabriek. Jasper staat klaar met Bootcamp op één van de terrassen. Annelijn begeleidt Pilates op het Dingestrand. En Luciën neemt de Kickboks-deelnemers mee naar de ligweide. Deelnemers worden verzocht via de kassa naar de Zwembar te gaan. Interesse? Informeer bij de kassa.'},
+  {id:'ma-6',dag:'ma',uur:20,min:0,titel:'Afsluiting — Zwembar 20:30',type:'afsluiting',enabled:true,tekst:'De activiteiten van Sportcentrum De Oude Fabriek zijn inmiddels beëindigd. De Zwembar sluit vanavond uiterlijk om 20:30 uur. Graag tot morgen — dan zijn we vanaf 07:00 uur weer voor u open!'},
+  {id:'di-1',dag:'di',uur:8,min:55,titel:'AquaFit Christa',type:'activiteit',enabled:true,tekst:'Attentie alstublieft. Over een paar minuten start de AquaFit-les van Christa. AquaFit is een heerlijke manier om fit te blijven in het water — voor alle leeftijden. Deelnemers met een abonnement zijn welkom. Heeft u nog geen abonnement? U kunt eenmalig meedoen voor 7 euro en 50 cent — meld u aan bij de kassa. Deelnemers verzamelen in de centrale hal. Een deel van het bad wordt tijdelijk afgesloten tot 09:30.'},
+  {id:'di-2',dag:'di',uur:16,min:30,titel:'Aankondiging sluiting + avond',type:'sluiting',enabled:true,tekst:'Attentie alstublieft. Over een kwartier, om 16:45, sluiten wij de baden. Wilt u straks het water verlaten en ook de ligweide en het terras opruimen? Om 18:30 zijn we weer open. Vanavond: Greta geeft yoga op het Dingestrand en Sabine een energieke Zumba-les — beide van Sportcentrum De Oude Fabriek. Meer weten? Vraag het bij de kassa. Tot zo!'},
+  {id:'di-3',dag:'di',uur:16,min:45,titel:'Definitieve sluiting',type:'sluiting',enabled:true,tekst:'Beste aanwezigen, de baden worden nu gesloten. Wilt u alstublieft het water, de ligweides en het terras verlaten? Hartelijk dank — we zien u graag straks terug.'},
+  {id:'di-4',dag:'di',uur:18,min:25,titel:'Heropening',type:'',enabled:true,tekst:'Goed nieuws — over vijf minuten, om 18:30, gaan de baden weer open voor iedereen. Welkom terug!'},
+  {id:'di-5',dag:'di',uur:18,min:55,titel:'Yoga Greta + Zumba Sabine',type:'activiteit',enabled:true,tekst:'Attentie alstublieft. Over een paar minuten starten twee lessen van Sportcentrum De Oude Fabriek. Greta geeft yoga op het Dingestrand. Sabine start om 19:15 met Zumba op de ligweide. Deelnemers verzamelen in de Zwembar. Interesse? Informeer bij de kassa.'},
+  {id:'di-6',dag:'di',uur:19,min:10,titel:'Zumba locatie vrijmaken',type:'activiteit',enabled:true,tekst:'Attentie alstublieft. Over vijf minuten start de Zumba-les van Sabine op de ligweide. Wilt u de aangewezen ligweide even vrijmaken? Hartelijk dank.'},
+  {id:'di-7',dag:'di',uur:20,min:15,titel:'Afsluiting — Zwembar 20:45',type:'afsluiting',enabled:true,tekst:'De lessen van Sportcentrum De Oude Fabriek zijn afgerond. De Zwembar sluit vanavond om 20:45. Graag tot morgen — vanaf 07:00 uur weer voor u open!'},
+  {id:'wo-1',dag:'wo',uur:9,min:55,titel:'Yoga Greta (testperiode)',type:'activiteit',enabled:true,tekst:'Attentie alstublieft. Over een paar minuten zal het Dingestrand worden gesloten. Op het Dingestrand wordt een yogales gegeven door Greta van Sportcentrum De Oude Fabriek. Interesse? Vraag informatie bij de kassa. Vanaf 11:00 weer voor iedereen geopend. Deelnemers verzamelen in de Zwembar.'},
+  {id:'wo-2',dag:'wo',uur:16,min:30,titel:'Aankondiging sluiting + avond',type:'sluiting',enabled:true,tekst:'Attentie alstublieft. Om 16:45 sluiten de baden. Wilt u straks het water en het terras verlaten? Om 18:30 zijn we weer open. Vanavond: Kickboksen jeugd met Yasmin, Buik Billen en Benen met Fleur, en Kickboksen volwassenen met Yasmin. En de trimgroep van Zwemclub De Dinge zwemt vanaf 20:00. Tot zo!'},
+  {id:'wo-3',dag:'wo',uur:16,min:45,titel:'Definitieve sluiting',type:'sluiting',enabled:true,tekst:'Beste aanwezigen, de baden worden nu gesloten. Wilt u alstublieft het water en het terras verlaten? Hartelijk dank — we zien u graag straks terug.'},
+  {id:'wo-4',dag:'wo',uur:18,min:25,titel:'Heropening + Kickboksen jeugd',type:'',enabled:true,tekst:'Goed nieuws — over vijf minuten, om 18:30, gaan de baden weer open voor iedereen. Welkom terug! En voor de deelnemers aan de Kickboksen-jeugdles van Yasmin: de les start om 18:30 uur. Deelnemers worden verzocht zich te verzamelen in de Zwembar.'},
+  {id:'wo-5',dag:'wo',uur:18,min:55,titel:'BBB Fleur + aankondiging',type:'activiteit',enabled:true,tekst:'Attentie alstublieft. Over een paar minuten start de les Buik, Billen en Benen van Fleur van Sportcentrum De Oude Fabriek. Deelnemers worden verzocht zich te verzamelen in de Zwembar, zodat Fleur de les goed kan voorbereiden. En voor wie het nog niet wist: om 19:30 start ook nog een Kickboksen-les voor volwassenen met Yasmin. Interesse in één van deze lessen? Informeer dan gerust bij de kassa.'},
+  {id:'wo-6',dag:'wo',uur:19,min:25,titel:'Kickboksen volwassenen Yasmin',type:'activiteit',enabled:true,tekst:'Attentie alstublieft. Over vijf minuten start Kickboksen volwassenen van Yasmin. Wilt u de locatie vrijmaken? Deelnemers verzamelen in de Zwembar. Hartelijk dank.'},
+  {id:'wo-7',dag:'wo',uur:19,min:55,titel:'Trimzwemmen Zwemclub',type:'zwemclub',enabled:true,tekst:'Attentie alstublieft. Vanaf 20:00 is het diepe bad gereserveerd voor Zwemclub De Dinge — de recreatieve trimgroep. De Dinge blijft voor andere zwemmers gesloten. Wilt u lid worden? Zoek de folder in het folderrek in de centrale hal.'},
+  {id:'wo-8',dag:'wo',uur:20,min:30,titel:'Afsluiting — Zwembar 21:00',type:'afsluiting',enabled:true,tekst:'De lessen van De Oude Fabriek zijn afgerond. De Zwembar sluit om 21:00. De trimgroep zwemt nog tot sluitingstijd. Graag tot morgen!'},
+  {id:'do-1',dag:'do',uur:8,min:55,titel:'55+ Fit Jasper (v.a. juni)',type:'activiteit',enabled:false,tekst:'Attentie alstublieft. Over een paar minuten start de les 55 plus Fit van Jasper van Sportcentrum De Oude Fabriek — speciaal voor 55-plussers. Deelnemers verzamelen in de centrale hal. Interesse? Vraag informatie bij de kassa.'},
+  {id:'do-2',dag:'do',uur:9,min:50,titel:'Alfacollege + Tennis (1e)',type:'alfacollege',enabled:true,tekst:'Attentie alstublieft. Vandaag is er weer een bijzondere donderdagochtend bij De Dinge. Studenten van het Alfacollege Sport en Bewegen geven tussen 10:00 en 11:00 een gratis beweegles. Tegelijkertijd kunt u op de tennisbaan van Tennisclub Hefshuizen kennismaken met tennis — ook gratis. Of u nu 20 bent of 80, u bent van harte welkom. Ook voor mensen van buiten het zwembad. We vragen u vooraf of na afloop iets te nuttigen in de Zwembar. Verzamelen in de Zwembar.'},
+  {id:'do-3',dag:'do',uur:9,min:55,titel:'Alfacollege + Tennis (2e)',type:'alfacollege',enabled:true,tekst:'Attentie alstublieft. Vandaag is er weer een bijzondere donderdagochtend bij De Dinge. Studenten van het Alfacollege Sport en Bewegen geven tussen 10:00 en 11:00 een gratis beweegles. Tegelijkertijd kunt u op de tennisbaan van Tennisclub Hefshuizen kennismaken met tennis — ook gratis. Of u nu 20 bent of 80, u bent van harte welkom. Ook voor mensen van buiten het zwembad. We vragen u vooraf of na afloop iets te nuttigen in de Zwembar. Verzamelen in de Zwembar.'},
+  {id:'do-4',dag:'do',uur:10,min:59,titel:'Afsluiting Alfacollege',type:'alfacollege',enabled:true,tekst:'De trainingen van het Alfacollege en de tennisintroductie van Tennisclub Hefshuizen zitten er bijna op. Hartelijk dank aan de studenten en alle deelnemers! Wij nodigen u uit voor een kop koffie, thee, iets fris of een gezonde smoothie in de Zwembar. Tot volgende week donderdag!'},
+  {id:'do-5',dag:'do',uur:16,min:30,titel:'Aankondiging sluiting + avond',type:'sluiting',enabled:true,tekst:'Attentie alstublieft. Over een kwartier, om 16:45, sluiten wij de baden om ons voor te bereiden op de zwemlessen. Wilt u straks het water verlaten en ook de ligweide en het terras opruimen? Voor blikjes en flesjes zijn er aparte statiegeldbakken beschikbaar. Vanavond staat er ook nog een Boetkempen-les op het programma van Sportcentrum De Oude Fabriek — gegeven door Damian. Een mooie manier om de dag actief af te sluiten. Meer weten? Vraag het gerust bij de kassa. Om 18:30 zijn we weer gewoon open voor iedereen. Tot zo!'},
+  {id:'do-6',dag:'do',uur:16,min:45,titel:'Definitieve sluiting',type:'sluiting',enabled:true,tekst:'Beste aanwezigen, de baden worden nu gesloten voor de zwemlessen. Wilt u alstublieft het water, de ligweides en het terras verlaten? Hartelijk dank voor uw bezoek aan De Dinge Hefshuizen — we zien u graag straks of een andere keer weer terug.'},
+  {id:'do-7',dag:'do',uur:18,min:25,titel:'Heropening',type:'',enabled:true,tekst:'Goed nieuws — over vijf minuten, om 18:30, gaan de baden weer open voor iedereen. Welkom terug bij De Dinge Hefshuizen!'},
+  {id:'do-8',dag:'do',uur:18,min:55,titel:'Bootcamp Damian',type:'activiteit',enabled:true,tekst:'Attentie alstublieft. Over een paar minuten start de Boetkempen-les van Damian van Sportcentrum De Oude Fabriek. Damian neemt zijn deelnemers mee naar één van de terrassen of de ligweide voor een energieke training. Deelnemers worden verzocht zich te verzamelen in de Zwembar, zodat Damian met iedereen de les goed kan voorbereiden. Heeft u interesse in Boetkempen? Vraag dan gerust meer informatie bij de kassa.'},
+  {id:'do-9',dag:'do',uur:20,min:0,titel:'Afsluiting — Zwembar 20:30',type:'afsluiting',enabled:true,tekst:'De Boetkempen-les van Sportcentrum De Oude Fabriek is inmiddels afgerond. De Zwembar sluit vanavond uiterlijk om 20:30 uur. Hartelijk dank voor uw bezoek — graag tot morgen. Dan zijn we weer vanaf 07:00 uur voor u open!'},
+  {id:'vr-1',dag:'vr',uur:9,min:55,titel:'Pilates Annelijn',type:'activiteit',enabled:true,tekst:'Attentie alstublieft. Over een paar minuten start de Pilates-les van Annelijn van Sportcentrum De Oude Fabriek op het Dingestrand. Een heerlijke manier om de vrijdagochtend actief te beginnen. Deelnemers worden verzocht zich te verzamelen in de Zwembar, zodat Annelijn de les goed kan voorbereiden. Heeft u interesse in Pilates? Vraag dan gerust meer informatie bij de kassa.'},
+  {id:'vr-2',dag:'vr',uur:16,min:30,titel:'Aankondiging sluiting + weekend',type:'sluiting',enabled:true,tekst:'Attentie alstublieft. Over een kwartier, om 16:45, sluiten wij de baden om ons voor te bereiden op de zwemlessen. Wilt u straks het water verlaten en ook de ligweide en het terras opruimen? Voor blikjes en flesjes zijn er aparte statiegeldbakken beschikbaar. Om 18:30 zijn we nog even open — dan sluit Luciën van Sportcentrum De Oude Fabriek de week sportief af met een Kickboksen-les. Dit weekend zijn we zaterdag en zondag geopend van 11:00 tot 17:00 uur. Op zaterdagavond zijn er trainingen van Zwemclub De Dinge. Alvast een fijn weekend!'},
+  {id:'vr-3',dag:'vr',uur:16,min:45,titel:'Definitieve sluiting',type:'sluiting',enabled:true,tekst:'Beste aanwezigen, de baden worden nu gesloten voor de zwemlessen. Wilt u alstublieft het water, de ligweides en het terras verlaten? Hartelijk dank voor uw bezoek aan De Dinge Hefshuizen — en alvast een heel fijn weekend!'},
+  {id:'vr-4',dag:'vr',uur:18,min:25,titel:'Heropening',type:'',enabled:true,tekst:'Goed nieuws — over vijf minuten, om 18:30, gaan de baden weer open voor iedereen. Welkom terug — geniet van de vrijdagavond bij De Dinge Hefshuizen!'},
+  {id:'vr-5',dag:'vr',uur:19,min:25,titel:'Kickboksen Luciën',type:'activiteit',enabled:true,tekst:'Attentie alstublieft. Over vijf minuten start de Kickboksen-les van Luciën van Sportcentrum De Oude Fabriek. Wilt u de aangewezen locatie op de ligweide of het terras even vrijmaken voor de deelnemers? Deelnemers worden verzocht zich te verzamelen in de Zwembar. Hartelijk dank voor uw medewerking.'},
+  {id:'vr-6',dag:'vr',uur:19,min:40,titel:'Aankondiging sluiting bad',type:'sluiting',enabled:true,tekst:'Beste aanwezigen, over vijf minuten sluiten de baden voor vandaag. Wilt u alstublieft het water verlaten? Hartelijk dank voor uw bezoek aan De Dinge Hefshuizen. Dit weekend zijn we zaterdag en zondag geopend van 11:00 tot 17:00 uur — we zien u graag terug!'},
+  {id:'vr-7',dag:'vr',uur:20,min:30,titel:'Afsluiting — Zwembar 21:00',type:'afsluiting',enabled:true,tekst:'De Kickboksen-les van Sportcentrum De Oude Fabriek is inmiddels afgerond. De Zwembar sluit vanavond uiterlijk om 21:00 uur. Hartelijk dank voor uw bezoek — fijn weekend! We zien u zaterdag of zondag graag terug, tussen 11:00 en 17:00 uur.'},
+  {id:'za-1',dag:'za',uur:16,min:45,titel:'Aankondiging sluiting + Zwemclub',type:'sluiting',enabled:true,tekst:'Attentie alstublieft. Over een kwartier, om 17:00, sluiten de baden voor het publiek. Wilt u straks het water verlaten en ook de ligweide en het terras opruimen? Voor blikjes en flesjes zijn er aparte statiegeldbakken beschikbaar. Vanavond is het bad geopend voor de trainingen van Zwemclub De Dinge. Wilt u zelf lid worden van de zwemclub? Dan vindt u de folder van Zwemclub De Dinge in het folderrek in de centrale hal. Hartelijk dank voor uw bezoek — we hopen u morgen of een andere keer weer te mogen verwelkomen!'},
+  {id:'za-2',dag:'za',uur:17,min:0,titel:'Definitieve sluiting publiek',type:'sluiting',enabled:true,tekst:'Beste aanwezigen, de baden zijn nu gesloten voor het publiek. Wilt u alstublieft het water, de ligweides en het terras verlaten? Hartelijk dank voor uw bezoek aan De Dinge Hefshuizen — we zien u graag morgen terug, of de volgende keer. Tot ziens!'},
+  {id:'za-3',dag:'za',uur:18,min:25,titel:'Welkom Zwemclub trainingen',type:'zwemclub',enabled:true,tekst:'Van harte welkom bij Zwemclub De Dinge. Het bad is vanavond geopend voor de trainingen van de zwemclub. Wij wensen alle deelnemers een fijne en sportieve training. Wilt u zelf lid worden van Zwemclub De Dinge? U vindt de folder in het folderrek in de centrale hal — of vraag het aan één van onze medewerkers.'},
+  {id:'zo-1',dag:'zo',uur:16,min:45,titel:'Aankondiging sluiting',type:'sluiting',enabled:true,tekst:'Attentie alstublieft. Over een kwartier, om 17:00, sluiten de baden voor vandaag. Wilt u straks het water verlaten en ook de ligweide en het terras opruimen? Voor blikjes en flesjes zijn er aparte statiegeldbakken beschikbaar. Morgenochtend zijn we weer voor u open vanaf 07:00 uur — we zien u dan graag terug. Hartelijk dank voor uw bezoek!'},
+  {id:'zo-2',dag:'zo',uur:17,min:0,titel:'Definitieve sluiting',type:'sluiting',enabled:true,tekst:'Beste aanwezigen, de baden zijn nu gesloten voor vandaag. Wilt u alstublieft het water, de ligweides en het terras verlaten? Hartelijk dank voor uw bezoek aan De Dinge Hefshuizen. Morgenochtend zijn we weer voor u open vanaf 07:00 uur — een fijne avond nog, en tot morgen!'},
+];
+
+// STATE
+let sched=[],blokIdx=0,srcIdx=0,speelt=false,handmatig=false,ovTimer=null,isSpreking=false,volVoor=60;
+let stem=null,rate=0.95,pitch=1.0,svol=0.95;
+const muziekKeuze={};
+const audio=document.getElementById('audio-el');
+const gesproken=new Set();
+
+function isWeekend(){const d=new Date().getDay();return d===0||d===6;}
+function dagCode(){return['zo','ma','di','wo','do','vr','za'][new Date().getDay()];}
+function nowMins(){const n=new Date();return n.getHours()*60+n.getMinutes();}
+function getSched(){return isWeekend()?WE:WD;}
+function autoBlok(){
+  const s=getSched(),m=nowMins();
+  for(let i=0;i<s.length-1;i++){const b=s[i],st=b.startH*60+b.startM,en=b.endH*60+b.endM;if(m>=st&&m<en)return i;}
+  return s.length-1;
+}
+
+function togglePlay(){
+  const btn=document.getElementById('btn-play');
+  if(speelt){audio.pause();speelt=false;btn.textContent='▶';btn.classList.remove('playing');}
+  else{speelt=true;btn.textContent='⏸';btn.classList.add('playing');laadEnSpeel();}
+}
+function laadEnSpeel(){
+  const s=sched[blokIdx].sources[srcIdx];
+  if(!s.streamUrl){audio.pause();audio.src='';toast('Stille modus');return;}
+  if(!isSpreking){audio.src=s.streamUrl;audio.volume=document.getElementById('volume').value/100;audio.play().catch(()=>toast('Klik ▶ om te starten'));}
+}
+function nextSource(){const b=sched[blokIdx];srcIdx=(srcIdx+1)%b.sources.length;updateSrc();if(speelt)laadEnSpeel();toast('Bron: '+b.sources[srcIdx].name);}
+function setVolume(v){audio.volume=v/100;document.getElementById('vol-pct').textContent=v+'%';}
+
+function wisselBlok(idx,hand){
+  sched=getSched();blokIdx=idx;srcIdx=0;handmatig=hand;
+  const b=sched[idx];
+  document.getElementById('block-name').textContent=b.name;
+  document.getElementById('block-time-str').textContent=b.timeLabel;
+  document.getElementById('block-sfeer').textContent=b.sfeer;
+  document.getElementById('mood-bar').style.background=b.moodColor;
+  updateSrc();updateGrid();updateBadge();
+  if(speelt)laadEnSpeel();
+  if(hand){clearTimeout(ovTimer);ovTimer=setTimeout(()=>{handmatig=false;wisselBlok(autoBlok(),false);toast('Auto hervat');},30*60*1000);toast('Handmatig: '+b.shortName);}
+}
+function updateSrc(){const s=sched[blokIdx].sources[srcIdx];document.getElementById('source-name').textContent=s.name;document.getElementById('source-type').textContent=s.type;}
+function updateBadge(){const el=document.getElementById('mode-badge');el.textContent=handmatig?'MANUEEL':'AUTO';el.className='badge'+(handmatig?' manual':'');}
+
+// SPRAAK
+function laadStemmen(){
+  if(!window.speechSynthesis){toast('Spraak niet beschikbaar');return;}
+  const laden=()=>{
+    const vs=speechSynthesis.getVoices().filter(v=>v.lang.startsWith('nl')||v.lang.startsWith('NL'));
+    const grid=document.getElementById('stem-grid');
+    if(!vs.length){grid.innerHTML='<div style="font-size:12px;color:rgba(240,236,224,.4);font-style:italic;">Geen NL stemmen. Probeer Chrome of Edge.</div>';return;}
+    grid.innerHTML='';
+    vs.forEach((v,i)=>{
+      const btn=document.createElement('button');
+      btn.className='stem-btn'+(i===0?' active':'');
+      btn.textContent=v.name.replace(/Microsoft |Google /g,'');
+      btn.title=v.lang+' — '+v.name;
+      btn.onclick=()=>{stem=v;document.querySelectorAll('.stem-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.getElementById('stem-status').textContent=v.name;testStem();};
+      if(i===0)stem=v;
+      grid.appendChild(btn);
+    });
+    document.getElementById('stem-status').textContent=vs[0]?.name||'—';
+  };
+  speechSynthesis.onvoiceschanged=laden;laden();
+}
+function testStem(){if(!stem){toast('Geen stem');return;}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance('Welkom bij Dinge Radio, de sfeer van de Waddenkust en Noordzee.');u.voice=stem;u.lang='nl-NL';u.rate=rate;u.pitch=pitch;u.volume=svol;speechSynthesis.speak(u);}
+function updateSpeechSettings(){rate=parseFloat(document.getElementById('speech-rate').value);pitch=parseFloat(document.getElementById('speech-pitch').value);svol=parseFloat(document.getElementById('speech-volume').value);}
+
+function spreek(tekst){
+  if(!window.speechSynthesis||isSpreking)return;
+  isSpreking=true;
+  volVoor=document.getElementById('volume').value;
+  audio.volume=0.07;
+  document.getElementById('speech-badge').style.display='inline-block';
+  const banner=document.getElementById('ann-banner');
+  document.getElementById('ann-text').textContent=tekst;
+  banner.classList.add('show');
+  const bar=document.getElementById('ann-bar');
+  const dur=Math.max(3000,tekst.length*58);
+  bar.style.transition='width '+dur+'ms linear';
+  bar.style.width='100%';
+  setTimeout(()=>bar.style.width='0%',80);
+  // Speel geluidseffect en start daarna de spraak
+  speelGeluid(geluidsKeuze);
+  const vertraging=geluidsKeuze==='geen'?0:geluidsKeuze==='scheepshoorn'?2000:1000;
+  setTimeout(()=>{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(tekst);
+    if(stem)u.voice=stem;
+    u.lang='nl-NL';u.rate=rate;u.pitch=pitch;u.volume=svol;
+    u.onend=()=>{isSpreking=false;audio.volume=volVoor/100;document.getElementById('speech-badge').style.display='none';setTimeout(()=>banner.classList.remove('show'),600);};
+    speechSynthesis.speak(u);
+  },vertraging);
+}
+
+// TIMING
+function checkBerichten(){
+  const now=new Date(),dag=dagCode(),u=now.getHours(),m=now.getMinutes(),s=now.getSeconds();
+  if(s>2)return;
+  BERICHTEN.forEach(b=>{
+    if(!b.enabled)return;
+    if(b.dag!==dag&&b.dag!=='dagelijks')return;
+    if(b.uur===u&&b.min===m){
+      const key=b.id+'-'+now.toDateString()+'-'+u+':'+m;
+      if(!gesproken.has(key)){gesproken.add(key);setTimeout(()=>spreek(b.tekst),1200);}
+    }
+  });
+}
+
+// KLOK
+function tick(){
+  const n=new Date();
+  document.getElementById('clock').textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0')+':'+String(n.getSeconds()).padStart(2,'0');
+  checkBerichten();
+  if(!handmatig){const a=autoBlok();if(a!==blokIdx)wisselBlok(a,false);}
+}
+
+// GRID
+function buildGrid(){
+  const g=document.getElementById('schedule-grid');g.innerHTML='';
+  sched.forEach((b,i)=>{
+    const d=document.createElement('div');d.className='sched-block';d.id='sb-'+i;
+    d.innerHTML='<div class="sched-time">'+b.timeLabel.split(' – ')[0]+'</div><div class="sched-name">'+b.shortName+'</div>';
+    d.onclick=()=>wisselBlok(i,true);g.appendChild(d);
+  });
+  updateGrid();
+}
+function updateGrid(){sched.forEach((_,i)=>{const el=document.getElementById('sb-'+i);if(!el)return;el.classList.remove('active','override');if(i===blokIdx)el.classList.add(handmatig?'override':'active');});}
+
+// BEHEER
+const DAGL={ma:'Maandag',di:'Dinsdag',wo:'Woensdag',do:'Donderdag',vr:'Vrijdag',za:'Zaterdag',zo:'Zondag',dagelijks:'Dagelijks'};
+function bouwBeheer(){
+  const c=document.getElementById('beheer-content');c.innerHTML='';
+  const gr={dagelijks:[],ma:[],di:[],wo:[],do:[],vr:[],za:[],zo:[]};
+  BERICHTEN.forEach(b=>{if(gr[b.dag])gr[b.dag].push(b);});
+  Object.entries(gr).forEach(([dag,items])=>{
+    if(!items.length)return;
+    const sec=document.createElement('div');sec.className='beheer-section';
+    sec.innerHTML='<div class="beheer-day">'+DAGL[dag]+'</div>';
+    items.sort((a,b)=>a.uur*60+a.min-(b.uur*60+b.min)).forEach(b=>{
+      const el=document.createElement('div');
+      el.className='msg-item'+(b.type?' '+b.type:'')+(b.enabled?'':' disabled');
+      el.id='mi-'+b.id;
+      el.innerHTML=`<div class="msg-item-header">
+        <span class="msg-time-badge">${String(b.uur).padStart(2,'0')}:${String(b.min).padStart(2,'0')}</span>
+        <span class="msg-title">${b.titel}</span>
+        <div class="msg-actions">
+          <button class="btn-icon${b.enabled?' aan':''}" title="${b.enabled?'Uitschakelen':'Inschakelen'}" onclick="toggleB('${b.id}')">${b.enabled?'✓':'○'}</button>
+          <button class="btn-icon" title="Bewerk" onclick="toggleT('${b.id}')">✎</button>
+          <button class="btn-icon" title="Nu voorlezen" onclick="spreek(getB('${b.id}').tekst)">▶</button>
+          <button class="btn-icon danger" title="Verwijder" onclick="delB('${b.id}')">✕</button>
+        </div></div>
+        <div class="msg-text-preview" id="pv-${b.id}">${b.tekst}</div>
+        <textarea class="msg-edit-area" id="ea-${b.id}">${b.tekst}</textarea>
+        <div class="msg-edit-row" id="er-${b.id}">
+          <button class="btn-small" onclick="slaOp('${b.id}')">Opslaan</button>
+          <button class="btn-small" onclick="toggleT('${b.id}')">Annuleren</button>
+        </div>`;
+      sec.appendChild(el);
+    });
+    c.appendChild(sec);
+  });
+}
+function getB(id){return BERICHTEN.find(b=>b.id===id);}
+function toggleB(id){const b=getB(id);if(!b)return;b.enabled=!b.enabled;bouwBeheer();slaOpslaanLokaal();toast(b.enabled?'✓ '+b.titel+' aan':'○ '+b.titel+' uit');}
+function toggleT(id){
+  const pv=document.getElementById('pv-'+id),ea=document.getElementById('ea-'+id),er=document.getElementById('er-'+id);
+  const open=pv.classList.contains('open');
+  if(open){pv.classList.remove('open');ea.classList.remove('open');er.classList.remove('open');}
+  else{pv.classList.add('open');ea.classList.add('open');er.classList.add('open');}
+}
+function slaOp(id){const b=getB(id);if(!b)return;b.tekst=document.getElementById('ea-'+id).value;bouwBeheer();slaOpslaanLokaal();toast('✓ Opgeslagen');}
+function delB(id){if(!confirm('Bericht verwijderen?'))return;BERICHTEN=BERICHTEN.filter(b=>b.id!==id);bouwBeheer();slaOpslaanLokaal();toast('Verwijderd');}
+function voegToe(){
+  const dag=document.getElementById('new-dag').value;
+  const t=document.getElementById('new-tijd').value.split(':');
+  const titel=document.getElementById('new-titel').value.trim();
+  const tekst=document.getElementById('new-tekst').value.trim();
+  const type=document.getElementById('new-type').value;
+  if(!titel||!tekst){toast('Vul titel en tekst in');return;}
+  BERICHTEN.push({id:'c-'+Date.now(),dag,uur:parseInt(t[0]),min:parseInt(t[1]),titel,type,enabled:true,tekst});
+  bouwBeheer();slaOpslaanLokaal();document.getElementById('new-titel').value='';document.getElementById('new-tekst').value='';
+  toast('✓ Bericht toegevoegd');
+}
+
+function kiesGeluid(naam,btn){
+  geluidsKeuze=naam;
+  document.querySelectorAll('.geluid-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  slaOpslaanLokaal();
+  speelGeluid(naam);
+}
+
+function wijzigPIN(){
+  const oud=document.getElementById('pin-oud').value;
+  const nieuw=document.getElementById('pin-nieuw').value;
+  if(oud!==getPIN()){toast('⚠ Huidige pincode onjuist');return;}
+  if(!/^\d{4}$/.test(nieuw)){toast('⚠ Nieuwe pincode moet 4 cijfers zijn');return;}
+  localStorage.setItem(PIN_KEY,nieuw);
+  document.getElementById('pin-oud').value='';
+  document.getElementById('pin-nieuw').value='';
+  toast('✓ Pincode gewijzigd');
+}
+
+function wisOpslag(){if(!confirm('Weet u zeker dat u alle wijzigingen wilt verwijderen en terug wilt naar de originele teksten?'))return;localStorage.removeItem(STORAGE_KEY);location.reload();}
+
+// TABS
+function showTab(n){
+  // Speler is altijd vrij toegankelijk
+  if(n==='speler'){_openTab(n);return;}
+  // Andere tabbladen vereisen pincode
+  vraagPIN(n);
+}
+
+// TOAST
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),3000);}
+
+// =====================================================
+// ALLE BESCHIKBARE ZENDERS
+// ✓ = getest werkend  ⚠ = mogelijk CORS beperking
+// =====================================================
+const ZENDERS=[
+  {cat:'🌊 Rustig / Ambient — SomaFM ✓',zenders:[
+    {name:'Drone Zone',desc:'Diep en atmosferisch — drone ambient',url:'https://ice1.somafm.com/dronezone-128-mp3'},
+    {name:'Lush',desc:'Zachte texturen, minimale beats',url:'https://ice1.somafm.com/lush-128-mp3'},
+    {name:'Space Station',desc:'Ruimteambient, zweefsfeer',url:'https://ice1.somafm.com/spacestation-128-mp3'},
+    {name:'Digitalis',desc:'Organisch ambient, plantaardig gevoel',url:'https://ice1.somafm.com/digitalis-128-mp3'},
+    {name:'Fluid',desc:'Smooth elektronisch, warm en vloeiend',url:'https://ice1.somafm.com/fluid-128-mp3'},
+  ]},
+  {cat:'☀️ Ochtend / Focus — SomaFM ✓',zenders:[
+    {name:'Groove Salad Classic',desc:'Rustige downtempo, geen stemmen',url:'https://ice1.somafm.com/gsclassic-128-mp3'},
+    {name:'Groove Salad',desc:'Iets levendiger downtempo',url:'https://ice1.somafm.com/groovesalad-128-mp3'},
+    {name:'Beat Blender',desc:'Chill beats, zomerse sfeer',url:'https://ice1.somafm.com/beatblender-128-mp3'},
+  ]},
+  {cat:'🏖️ Zomers / Strand — SomaFM ✓',zenders:[
+    {name:'Suburbs of Goa',desc:'Wereldmuziek, tropisch en warm',url:'https://ice1.somafm.com/suburbsofgoa-128-mp3'},
+    {name:'Tiki Time',desc:'Eilandgevoel, vintage Tiki sfeer',url:'https://ice1.somafm.com/tikitime-128-mp3'},
+    {name:'Illinois Street Lounge',desc:'Cocktailbar, jazzy lounge',url:'https://ice1.somafm.com/illstreet-128-mp3'},
+  ]},
+  {cat:'🎷 Jazz / Lounge — SomaFM ✓',zenders:[
+    {name:'Secret Agent',desc:'Spionnenlounge, swingende jazz',url:'https://ice1.somafm.com/secretagent-128-mp3'},
+    {name:'Covers',desc:'Instrumentale covers van bekende nummers',url:'https://ice1.somafm.com/covers-128-mp3'},
+    {name:'Folk Forward',desc:'Folkloristische en akoestische muziek',url:'https://ice1.somafm.com/folkfwd-128-mp3'},
+  ]},
+  {cat:'🎉 Feestelijk / Bijzonder — SomaFM ✓',zenders:[
+    {name:'PopTron',desc:'Upbeat elektronisch, feestelijk',url:'https://ice1.somafm.com/poptron-128-mp3'},
+    {name:'Left Coast 70s',desc:'70s hits, nostalgisch en vrolijk',url:'https://ice1.somafm.com/seventies-128-mp3'},
+    {name:'Christmas Lounge',desc:'Sfeervolle kerst — seizoensgebonden',url:'https://ice1.somafm.com/christmas-128-mp3'},
+    {name:'Christmas Rocks!',desc:'Alternatieve kerstmuziek',url:'https://ice1.somafm.com/xmasrocks-128-mp3'},
+    {name:'Holiday Classics',desc:'Klassieke feestmuziek',url:'https://ice1.somafm.com/holidayclassics-128-mp3'},
+    {name:'Jolly Ol Soul',desc:'Soul voor de feestdagen',url:'https://ice1.somafm.com/jollysoul-128-mp3'},
+  ]},
+  {cat:'🎸 Rock / Pop — SomaFM ✓',zenders:[
+    {name:'Underground 80s',desc:'Alternatieve 80s hits',url:'https://ice1.somafm.com/u80s-128-mp3'},
+    {name:'Indie Pop Rocks!',desc:'Indie pop en alternatieve rock',url:'https://ice1.somafm.com/indiepop-128-mp3'},
+    {name:'BAGeL Radio',desc:'Indie en alternatief, New York stijl',url:'https://ice1.somafm.com/bagel-128-mp3'},
+  ]},
+  {cat:'🎼 Klassiek / Instrumentaal ✓',zenders:[
+    {name:'SomaFM — Classical Blend',desc:'Klassieke muziek, rustig en tijdloos',url:'https://ice1.somafm.com/classicalblend-128-mp3'},
+    {name:'Radio Paradise — Classical',desc:'Klassiek, hoogwaardig — RP netwerk',url:'https://stream.radioparadise.com/classical-128'},
+  ]},
+  {cat:'🌍 Wereldmuziek / Bijzonder ✓',zenders:[
+    {name:'SomaFM — Global Village',desc:'Wereldmuziek uit alle windstreken',url:'https://ice1.somafm.com/globalvillage-128-mp3'},
+    {name:'Radio Paradise — World',desc:'Eclectisch wereldmuziek — RP netwerk',url:'https://stream.radioparadise.com/world-etc-128'},
+  ]},
+  {cat:'📻 Radio Paradise ✓',zenders:[
+    {name:'Radio Paradise — Main Mix',desc:'Eclectisch, advertentievrij, DJ-gemixed',url:'https://stream.radioparadise.com/mp3-128'},
+    {name:'Radio Paradise — Mellow Mix',desc:'Rustig en ontspannen — geen zware beats',url:'https://stream.radioparadise.com/mellow-128'},
+    {name:'Radio Paradise — Rock Mix',desc:'Rock en alternatief, breed scala',url:'https://stream.radioparadise.com/rock-128'},
+  ]},
+  {cat:'🔇 Overig',zenders:[
+    {name:'Stille modus',desc:'Geen muziek afspelen',url:null},
+  ]},
+];
+
+// =====================================================
+// LOKALE OPSLAG (optie A)
+// Slaat alle wijzigingen op in de browser
+// Optie B (server): zie slaOpServer() hieronder
+// =====================================================
+const STORAGE_KEY='dinge-radio-v1';
+
+function laadOpgeslagen(){
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(!raw)return;
+    const data=JSON.parse(raw);
+    // Herstel berichtwijzigingen
+    if(data.berichten){
+      data.berichten.forEach(opgeslagen=>{
+        const b=BERICHTEN.find(x=>x.id===opgeslagen.id);
+        if(b){b.tekst=opgeslagen.tekst;b.enabled=opgeslagen.enabled;}
+        else if(opgeslagen.id.startsWith('c-'))BERICHTEN.push(opgeslagen);
+      });
+    }
+    if(data.geluidsKeuze){
+      geluidsKeuze=data.geluidsKeuze;
+    }
+    // Herstel muziekkeuzes
+    if(data.muziekKeuze){
+      Object.assign(muziekKeuze,data.muziekKeuze);
+      // Pas schema's aan
+      [...WD,...WE].forEach(blok=>{
+        if(muziekKeuze[blok.id]!==undefined){
+          const url=muziekKeuze[blok.id];
+          blok.sources[0]={name:'Opgeslagen keuze',type:'Aangepaste keuze',streamUrl:url};
+        }
+      });
+    }
+  }catch(e){console.warn('Opslag laden mislukt:',e);}
+}
+
+function slaOpslaanLokaal(){
+  try{
+    const data={
+      berichten:BERICHTEN.map(b=>({id:b.id,tekst:b.tekst,enabled:b.enabled,dag:b.dag,uur:b.uur,min:b.min,titel:b.titel,type:b.type})),
+      muziekKeuze:{...muziekKeuze},
+      geluidsKeuze:geluidsKeuze,
+      opgeslagenOp:new Date().toISOString(),
+    };
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+  }catch(e){console.warn('Opslag mislukt:',e);}
+}
+
+// Optie B voorbereiding — serveropslag via Stefan
+// Uncomment en configureer zodra Stefan de server klaar heeft:
+/*
+const SERVER_URL='https://zwembadeneemsmond.nl/dinge-radio/opslaan.php';
+async function slaOpServer(){
+  try{
+    const data={berichten:BERICHTEN,muziekKeuze};
+    await fetch(SERVER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+  }catch(e){console.warn('Server opslag mislukt:',e);}
+}
+*/
+
+// Auto-opslaan elke 30 seconden
+setInterval(slaOpslaanLokaal, 30000);
+
+function bouwMuziekPanel(){
+  const c=document.getElementById('muziek-blokken');c.innerHTML='';
+
+  // Toon weekdagen en weekend apart
+  const secties=[
+    {label:'Weekdagen', blokken:WD},
+    {label:'Weekend (zat/zon)', blokken:WE},
+  ];
+
+  secties.forEach(sectie=>{
+    // Sectie header
+    const hdrSec=document.createElement('div');
+    hdrSec.style.cssText='font-family:\'Playfair Display\',serif;font-size:15px;color:var(--foam);margin-bottom:10px;margin-top:16px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,.08);';
+    hdrSec.textContent=sectie.label;
+    c.appendChild(hdrSec);
+
+    sectie.blokken.forEach(blok=>{
+      const wrap=document.createElement('div');
+      wrap.style.cssText='margin-bottom:12px;';
+
+      const hdr=document.createElement('div');
+      hdr.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;';
+      hdr.innerHTML=`<div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--sky);letter-spacing:2px;text-transform:uppercase;">${blok.shortName}</div><div style="font-size:10px;color:rgba(240,236,224,.35);font-family:'DM Mono',monospace;">${blok.timeLabel}</div>`;
+
+      const sel=document.createElement('select');
+      sel.style.cssText='width:100%;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:8px 12px;color:var(--foam);font-size:12px;font-family:\'DM Sans\',sans-serif;outline:none;cursor:pointer;';
+      sel.id='mz-'+blok.id;
+
+      const huidigUrl=muziekKeuze[blok.id]!==undefined ? muziekKeuze[blok.id] : blok.sources[0].streamUrl;
+
+      ZENDERS.forEach(cat=>{
+        const og=document.createElement('optgroup');
+        og.label=cat.cat;
+        cat.zenders.forEach(z=>{
+          const opt=document.createElement('option');
+          opt.value=z.url||'';
+          opt.textContent=z.name+' — '+z.desc;
+          if((z.url||'')===(huidigUrl||''))opt.selected=true;
+          og.appendChild(opt);
+        });
+        sel.appendChild(og);
+      });
+
+      sel.onchange=()=>{
+        const url=sel.value||null;
+        const naam=sel.options[sel.selectedIndex].text.split(' — ')[0];
+        muziekKeuze[blok.id]=url;
+        blok.sources[0]={name:naam,type:'Aangepaste keuze',streamUrl:url};
+        if(sched[blokIdx]&&sched[blokIdx].id===blok.id){
+          srcIdx=0;updateSrc();if(speelt)laadEnSpeel();
+        }
+        toast('✓ '+blok.shortName+': '+naam);
+        slaOpslaanLokaal();
+      };
+
+      wrap.appendChild(hdr);wrap.appendChild(sel);
+      c.appendChild(wrap);
+    });
+  });
+}
+
+// =====================================================
+// PIN BEVEILIGING
+// Standaard pincode: 1234 (via beheer aanpasbaar)
+// Beschermt: Muziek, Stem en Beheer tabbladen
+// =====================================================
+const PIN_KEY='dinge-radio-pin';
+let pinBuffer='';
+let pinVerified=false;
+let pinDoel=''; // welk tabblad wordt geopend na PIN
+
+function getPIN(){return localStorage.getItem(PIN_KEY)||'1234';}
+
+function vraagPIN(doel){
+  pinDoel=doel;pinBuffer='';
+  updatePinDots();
+  document.getElementById('pin-sub').textContent='Voer de pincode in voor '+{muziek:'🎵 Muziek',stem:'🎙 Stem',beheer:'⚙ Beheer'}[doel];
+  document.getElementById('pin-error').textContent='';
+  document.getElementById('pin-overlay').classList.remove('hidden');
+}
+
+function pinToets(c){
+  if(!c)return;
+  if(pinBuffer.length>=4)return;
+  pinBuffer+=c;
+  updatePinDots();
+  if(pinBuffer.length===4)setTimeout(controleerPIN,150);
+}
+
+function pinWis(){pinBuffer=pinBuffer.slice(0,-1);updatePinDots();}
+
+function updatePinDots(){
+  for(let i=0;i<4;i++){
+    document.getElementById('pd'+i).classList.toggle('filled',i<pinBuffer.length);
+  }
+}
+
+function controleerPIN(){
+  if(pinBuffer===getPIN()){
+    document.getElementById('pin-overlay').classList.add('hidden');
+    pinBuffer='';updatePinDots();
+    // Open het gewenste tabblad
+    _openTab(pinDoel);
+  } else {
+    document.getElementById('pin-error').textContent='Onjuiste pincode — probeer opnieuw';
+    pinBuffer='';updatePinDots();
+    setTimeout(()=>document.getElementById('pin-error').textContent='',2000);
+  }
+}
+
+function _openTab(n){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelector('.tab[onclick="showTab(\''+n+'\')"]').classList.add('active');
+  document.getElementById('panel-'+n).classList.add('active');
+  if(n==='beheer')bouwBeheer();
+  if(n==='muziek')bouwMuziekPanel();
+}
+
+// =====================================================
+// WEB AUDIO GELUIDSEFFECTEN
+// Gegenereerd via Web Audio API — geen externe bestanden
+// =====================================================
+let geluidsKeuze='plingplong'; // standaard
+
+const GELUIDEN={
+  plingplong: (ctx)=>{
+    // Twee tonen: C5 en E5
+    [[523,0],[659,0.3],[784,0.6]].forEach(([freq,delay])=>{
+      const osc=ctx.createOscillator();const gain=ctx.createGain();
+      osc.connect(gain);gain.connect(ctx.destination);
+      osc.frequency.value=freq;osc.type='sine';
+      gain.gain.setValueAtTime(0,ctx.currentTime+delay);
+      gain.gain.linearRampToValueAtTime(0.4,ctx.currentTime+delay+0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+delay+0.8);
+      osc.start(ctx.currentTime+delay);osc.stop(ctx.currentTime+delay+0.8);
+    });
+  },
+  plons: (ctx)=>{
+    // Ruis burst + lage toon = plons effect
+    const buf=ctx.createBuffer(1,ctx.sampleRate*0.5,ctx.sampleRate);
+    const data=buf.getChannelData(0);
+    for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*Math.pow(1-i/data.length,2);
+    const src=ctx.createBufferSource();src.buffer=buf;
+    const gain=ctx.createGain();const filter=ctx.createBiquadFilter();
+    filter.type='lowpass';filter.frequency.value=800;
+    src.connect(filter);filter.connect(gain);gain.connect(ctx.destination);
+    gain.gain.setValueAtTime(0.6,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.5);
+    src.start();
+    // Lage borreltoon
+    const osc=ctx.createOscillator();const g2=ctx.createGain();
+    osc.connect(g2);g2.connect(ctx.destination);
+    osc.frequency.setValueAtTime(120,ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(60,ctx.currentTime+0.3);
+    g2.gain.setValueAtTime(0.3,ctx.currentTime);
+    g2.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.3);
+    osc.start();osc.stop(ctx.currentTime+0.3);
+  },
+  scheepshoorn: (ctx)=>{
+    // Diepe lange toon met vibrato
+    const osc=ctx.createOscillator();const lfo=ctx.createOscillator();
+    const lfoGain=ctx.createGain();const gain=ctx.createGain();
+    lfo.frequency.value=5;lfoGain.gain.value=4;
+    lfo.connect(lfoGain);lfoGain.connect(osc.frequency);
+    osc.connect(gain);gain.connect(ctx.destination);
+    osc.type='sawtooth';osc.frequency.value=110;
+    gain.gain.setValueAtTime(0,ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.5,ctx.currentTime+0.15);
+    gain.gain.setValueAtTime(0.5,ctx.currentTime+1.2);
+    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+1.8);
+    lfo.start();osc.start();lfo.stop(ctx.currentTime+1.8);osc.stop(ctx.currentTime+1.8);
+  },
+  meeuw: (ctx)=>{
+    // Stijgende en dalende toon = krijsende meeuw
+    [[0,800,1400],[0.4,1400,900],[0.8,900,1300]].forEach(([delay,from,to])=>{
+      const osc=ctx.createOscillator();const gain=ctx.createGain();
+      osc.connect(gain);gain.connect(ctx.destination);
+      osc.type='sawtooth';
+      osc.frequency.setValueAtTime(from,ctx.currentTime+delay);
+      osc.frequency.exponentialRampToValueAtTime(to,ctx.currentTime+delay+0.25);
+      gain.gain.setValueAtTime(0.3,ctx.currentTime+delay);
+      gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+delay+0.35);
+      osc.start(ctx.currentTime+delay);osc.stop(ctx.currentTime+delay+0.35);
+    });
+  },
+  geen: ()=>{}, // stil
+};
+
+function speelGeluid(naam){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const fn=GELUIDEN[naam||geluidsKeuze];
+    if(fn)fn(ctx);
+  }catch(e){console.warn('Geluid mislukt:',e);}
+}
+
+// =====================================================
+// INIT
+laadOpgeslagen();
+sched=getSched();buildGrid();wisselBlok(autoBlok(),false);setInterval(tick,1000);tick();laadStemmen();
+toast('Welkom bij Dinge Radio — klik ▶ om te starten');
+</script>
+</body>
+</html>
