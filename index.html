@@ -141,6 +141,35 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.25);}
 .geluid-btn.active{background:rgba(126,200,216,.12);border-color:rgba(126,200,216,.4);color:var(--sky);}
 @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:500px){.player-card{padding:18px 14px}.form-row{flex-direction:column}}
+.bingo-card{background:rgba(14,34,51,.78);backdrop-filter:blur(24px);border:1px solid rgba(240,192,64,.2);border-radius:20px;padding:24px 28px;margin-bottom:16px;}
+.bingo-title{font-family:'Playfair Display',serif;font-size:22px;color:#f0c040;margin-bottom:4px;}
+.bingo-sub{font-size:11px;color:var(--dune);opacity:.6;font-family:'DM Mono',monospace;letter-spacing:2px;text-transform:uppercase;margin-bottom:18px;}
+.bingo-current{text-align:center;padding:20px 0;margin-bottom:16px;border:1px solid rgba(240,192,64,.15);border-radius:12px;background:rgba(240,192,64,.05);}
+.bingo-num-label{font-size:11px;color:rgba(240,192,64,.6);font-family:'DM Mono',monospace;letter-spacing:3px;text-transform:uppercase;margin-bottom:8px;}
+.bingo-num{font-family:'Playfair Display',serif;font-size:72px;color:#f0c040;line-height:1;font-weight:700;}
+.bingo-ordinal{font-size:13px;color:rgba(240,192,64,.7);margin-top:6px;font-family:'DM Mono',monospace;}
+.bingo-controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+.btn-bingo{padding:12px 16px;border-radius:10px;border:none;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;flex:1;min-width:90px;}
+.btn-bingo.start{background:#f0c040;color:#1a1a00;}
+.btn-bingo.start:hover{background:#f5d060;}
+.btn-bingo.pause{background:rgba(201,125,58,.8);color:var(--foam);}
+.btn-bingo.stop{background:rgba(200,80,80,.6);color:var(--foam);}
+.btn-bingo:disabled{opacity:.35;cursor:not-allowed;}
+.bingo-interval{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.bingo-interval label{font-size:11px;color:var(--dune);opacity:.6;font-family:'DM Mono',monospace;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;}
+.bingo-interval-val{font-family:'DM Mono',monospace;font-size:12px;color:#f0c040;width:55px;text-align:right;flex-shrink:0;}
+.bingo-progress{height:3px;background:rgba(240,192,64,.12);border-radius:2px;margin-bottom:14px;overflow:hidden;}
+.bingo-progress-bar{height:100%;background:#f0c040;border-radius:2px;transition:width linear;}
+.bingo-stats{display:flex;gap:16px;margin-bottom:14px;font-family:'DM Mono',monospace;font-size:11px;color:var(--dune);opacity:.6;}
+.bingo-paused{background:rgba(201,125,58,.1);border:1px solid rgba(201,125,58,.3);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--amber);margin-bottom:12px;display:none;}
+.bingo-paused.show{display:block;}
+.bingo-grid{display:flex;flex-wrap:wrap;gap:4px;}
+.bc{width:34px;height:34px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:11px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);color:rgba(240,236,224,.35);transition:all .4s;}
+.bc.called{background:rgba(240,192,64,.18);border-color:rgba(240,192,64,.45);color:#f0c040;font-weight:700;}
+.bc.latest{background:#f0c040;color:#1a1a00;border-color:#f0c040;transform:scale(1.12);}
+.bingo-field{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:12px 14px;margin-bottom:12px;}
+.bingo-field label{font-size:10px;color:var(--dune);opacity:.6;font-family:'DM Mono',monospace;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:5px;}
+.bingo-field textarea{width:100%;background:transparent;border:none;color:rgba(240,236,224,.8);font-size:12px;line-height:1.6;font-family:'DM Sans',sans-serif;resize:vertical;min-height:55px;outline:none;}
 </style>
 </head>
 <body>
@@ -197,6 +226,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.25);}
     <button class="tab" onclick="showTab('muziek')">🎵 Muziek</button>
     <button class="tab" onclick="showTab('stem')">🎙 Stem</button>
     <button class="tab" onclick="showTab('beheer')">⚙ Beheer</button>
+    <button class="tab" onclick="showTab('bingo')">🎯 Bingo</button>
   </div>
   <!-- SPELER -->
   <div class="panel active" id="panel-speler">
@@ -300,6 +330,44 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.25);}
       <button class="btn-small" style="margin-left:10px;" onclick="wisOpslag()">↺ Herstel origineel</button>
     </div>
   </div>
+
+  <!-- BINGO PANEEL -->
+  <div class="panel" id="panel-bingo">
+    <div class="bingo-card">
+      <div class="bingo-title">🎯 Dinge Zwem Bingo</div>
+      <div class="bingo-sub">Getallen 1–75 · Willekeurige volgorde per sessie</div>
+      <div class="bingo-current">
+        <div class="bingo-num-label">Huidig getal</div>
+        <div class="bingo-num" id="b-num">—</div>
+        <div class="bingo-ordinal" id="b-ordinal">Nog niet gestart</div>
+      </div>
+      <div class="bingo-paused" id="b-paused">⏸ Gepauzeerd — roep zelf om voor welke bingo jullie verdergaan, druk daarna op Hervatten.</div>
+      <div class="bingo-progress"><div class="bingo-progress-bar" id="b-bar" style="width:0%"></div></div>
+      <div class="bingo-stats">
+        <span>Omgeroepen: <strong id="b-count">0</strong> / 75</span>
+        <span>Resterend: <strong id="b-rest">75</strong></span>
+      </div>
+      <div class="bingo-controls">
+        <button class="btn-bingo start" id="b-start" onclick="bingoStart()">▶ Start sessie</button>
+        <button class="btn-bingo pause" id="b-pause" onclick="bingoPause()" disabled>⏸ Pauzeer</button>
+        <button class="btn-bingo stop" id="b-stop" onclick="bingoStop()" disabled>■ Stop</button>
+      </div>
+      <div class="bingo-interval">
+        <label>Tijd tussen getallen</label>
+        <input type="range" id="b-interval" min="2" max="8" step="0.5" value="4" oninput="document.getElementById('b-ival').textContent=this.value+' min'">
+        <span class="bingo-interval-val" id="b-ival">4 min</span>
+      </div>
+      <div class="bingo-field">
+        <label>Openingsaankondiging (aanpasbaar)</label>
+        <textarea id="b-opening">Attentie alstublieft, beste zwemmers en bezoekers van De Dinge Hefshuizen. Welkom bij de Dinge Zwem Bingo! We gaan beginnen met een volle bovenste rij. De spelregels zijn als volgt: zodra u een correcte bingo heeft, loopt u zo snel mogelijk naar de Bingo-master bij de kassa. Bij een goede bingo ontvangt u een mooie prijs uit Zwembar De Dinge. Let op: heeft u een foute bingo gemeld? Dan mag u helaas niet meer meedoen totdat er een geldige bingo is gevallen. We wensen iedereen veel plezier en succes — de Dinge Zwem Bingo begint nu!</textarea>
+      </div>
+      <div class="bingo-field">
+        <label>Omgeroepen getallen</label>
+        <div class="bingo-grid" id="b-grid"></div>
+      </div>
+    </div>
+  </div>
+
 </div>
 <div class="toast" id="toast"></div>
 <audio id="audio-el" style="display:none" crossorigin="anonymous"></audio>
@@ -591,6 +659,9 @@ function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t
 // ✓ = getest werkend  ⚠ = mogelijk CORS beperking
 // =====================================================
 const ZENDERS=[
+  {cat:'🔇 Geen muziek',zenders:[
+    {name:'Stille modus',desc:'Geen muziek afspelen in dit blok',url:null},
+  ]},
   {cat:'🌊 Rustig / Ambient — SomaFM ✓',zenders:[
     {name:'Drone Zone',desc:'Diep en atmosferisch — drone ambient',url:'https://ice1.somafm.com/dronezone-128-mp3'},
     {name:'Lush',desc:'Zachte texturen, minimale beats',url:'https://ice1.somafm.com/lush-128-mp3'},
@@ -825,6 +896,7 @@ function _openTab(n){
   document.getElementById('panel-'+n).classList.add('active');
   if(n==='beheer')bouwBeheer();
   if(n==='muziek')bouwMuziekPanel();
+  if(n==='bingo'){bouwBingoGrid();updateBingoButtons();}
 }
 
 // =====================================================
@@ -903,6 +975,209 @@ function speelGeluid(naam){
     const fn=GELUIDEN[naam||geluidsKeuze];
     if(fn)fn(ctx);
   }catch(e){console.warn('Geluid mislukt:',e);}
+}
+
+// =====================================================
+// VERBETERDE SCHEEPSHOORN
+// =====================================================
+GELUIDEN.scheepshoorn = (ctx) => {
+  // Rijke, diepe hoorn met meerdere harmonischen
+  [110, 220, 330].forEach((freq, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 600;
+    osc.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sawtooth';
+    osc.frequency.value = freq;
+    const vol = [0.4, 0.2, 0.1][i];
+    gain.gain.setValueAtTime(0, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(vol, ctx.currentTime + 0.2);
+    gain.gain.setValueAtTime(vol, ctx.currentTime + 1.4);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2.0);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 2.0);
+  });
+};
+
+// =====================================================
+// ZWEM BINGO
+// =====================================================
+let bingoGetallen = [];
+let bingoIdx = 0;
+let bingoTimer = null;
+let bingoActief = false;
+let bingoPauzeActief = false;
+let bingoGestart = false;
+let bingoProgressTimer = null;
+
+const ORDINALS = ['eerste','tweede','derde','vierde','vijfde','zesde','zevende','achtste','negende','tiende',
+  'elfde','twaalfde','dertiende','veertiende','vijftiende','zestiende','zeventiende','achttiende','negentiende','twintigste',
+  'eenentwintigste','tweeëntwintigste','drieëntwintigste','vierentwintigste','vijfentwintigste',
+  'zesentwintigste','zevenentwintigste','achtentwintigste','negenentwintigste','dertigste',
+  'eenendertigste','tweeëndertigste','drieëndertigste','vierendertigste','vijfendertigste',
+  'zesendertigste','zevenendertigste','achtendertigste','negenendertigste','veertigste',
+  'eenenveertigste','tweeënveertigste','drieënveertigste','vierenveertigste','vijfenveertigste',
+  'zesenveertigste','zevenenveertigste','achtenveertigste','negenenveertigste','vijftigste',
+  'eenenvijftigste','tweeënvijftigste','drieënvijftigste','vierenvijftigste','vijfenvijftigste',
+  'zesenvijftigste','zevenenvijftigste','achtenvijftigste','negenenvijftigste','zestigste',
+  'eenenzestigste','tweeënzestigste','drieënzestigste','vierenzestigste','vijfenzestigste',
+  'zesenzestigste','zevenenzestigste','achtenzestigste','negenenzestigste','zeventigste',
+  'eenenzeventigste','tweeënzeventigste','drieënzeventigste','vierenzesventigste','vijfenzeventigste'];
+
+function bingoSchud() {
+  bingoGetallen = Array.from({length:75},(_,i)=>i+1);
+  for(let i=bingoGetallen.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [bingoGetallen[i],bingoGetallen[j]]=[bingoGetallen[j],bingoGetallen[i]];
+  }
+}
+
+function bouwBingoGrid() {
+  const grid = document.getElementById('b-grid');
+  grid.innerHTML = '';
+  for(let i=1;i<=75;i++){
+    const el=document.createElement('div');
+    el.className='bc';el.id='bc-'+i;el.textContent=i;
+    grid.appendChild(el);
+  }
+}
+
+function bingoStart() {
+  if(bingoActief && !bingoPauzeActief) return;
+  if(!bingoGestart) {
+    // Nieuwe sessie
+    bingoSchud();
+    bingoIdx=0;
+    bingoGestart=true;
+    bouwBingoGrid();
+    // Reset display
+    document.getElementById('b-num').textContent='—';
+    document.getElementById('b-ordinal').textContent='Opening wordt omgeroepen…';
+    document.getElementById('b-count').textContent='0';
+    document.getElementById('b-rest').textContent='75';
+    document.getElementById('b-bar').style.width='0%';
+    document.querySelectorAll('.bc').forEach(el=>{el.classList.remove('called','latest');});
+    // Spreek openingstekst
+    const openTekst = document.getElementById('b-opening').value;
+    speelGeluid('plingplong');
+    setTimeout(()=>{
+      speelGeluid('scheepshoorn');
+      setTimeout(()=>spreekBingo(openTekst, ()=>{
+        bingoActief=true;bingoPauzeActief=false;
+        updateBingoButtons();
+        setTimeout(()=>bingoVolgend(), 3000);
+      }), 2200);
+    }, 800);
+  } else {
+    // Hervatten na pauze
+    bingoPauzeActief=false;bingoActief=true;
+    document.getElementById('b-paused').classList.remove('show');
+    updateBingoButtons();
+    bingoVolgend();
+  }
+  updateBingoButtons();
+}
+
+function bingoVolgend() {
+  if(!bingoActief || bingoPauzeActief) return;
+  if(bingoIdx >= 75) {
+    spreekBingo('En dat was het laatste getal van de Dinge Zwem Bingo! Alle vijfenzeventig getallen zijn omgeroepen. Hartelijk dank voor uw deelname!', ()=>{});
+    bingoActief=false;bingoGestart=false;updateBingoButtons();
+    return;
+  }
+  const getal = bingoGetallen[bingoIdx];
+  const ordinal = ORDINALS[bingoIdx] || `nummer ${bingoIdx+1}`;
+  bingoIdx++;
+  // Update display
+  const prevLatest=document.querySelector('.bc.latest');
+  if(prevLatest){prevLatest.classList.remove('latest');prevLatest.classList.add('called');}
+  const cel=document.getElementById('bc-'+getal);
+  if(cel)cel.classList.add('latest');
+  document.getElementById('b-num').textContent=getal;
+  document.getElementById('b-ordinal').textContent='Het '+ordinal+' getal';
+  document.getElementById('b-count').textContent=bingoIdx;
+  document.getElementById('b-rest').textContent=75-bingoIdx;
+  // Tekst opbouwen
+  const tekst=`Het ${ordinal} getal voor de Dinge Zwem Bingo is ${getal}. `+
+    `Heeft u bingo? Loop dan zo snel mogelijk naar de Bingo-master bij de kassa. `+
+    `Heeft u een goede bingo, dan ontvangt u een prijs. Zo niet, dan heeft u helaas pech en mag u pas weer meedoen nadat iemand anders een geldige bingo heeft gemeld. `+
+    `Nogmaals het bingo getal: nummer ${getal}. `+
+    `Bedankt voor uw aandacht en tot straks bij het volgende getal van de Dinge Zwem Bingo!`;
+  // Twee pling-plongs + scheepshoorn + tekst
+  speelGeluid('plingplong');
+  setTimeout(()=>speelGeluid('plingplong'), 900);
+  setTimeout(()=>speelGeluid('scheepshoorn'), 1900);
+  setTimeout(()=>spreekBingo(tekst, ()=>{
+    if(!bingoActief||bingoPauzeActief)return;
+    // Start countdown voor volgend getal
+    const minuten=parseFloat(document.getElementById('b-interval').value);
+    const ms=minuten*60*1000;
+    const bar=document.getElementById('b-bar');
+    bar.style.transition='none';bar.style.width='100%';
+    setTimeout(()=>{
+      bar.style.transition=`width ${ms}ms linear`;
+      bar.style.width='0%';
+    },100);
+    bingoTimer=setTimeout(()=>{if(bingoActief&&!bingoPauzeActief)bingoVolgend();},ms);
+  }), 4000);
+}
+
+function spreekBingo(tekst, callback) {
+  if(!window.speechSynthesis)return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(tekst);
+  if(stem)u.voice=stem;
+  u.lang='nl-NL';u.rate=rate;u.pitch=pitch;u.volume=svol;
+  u.onend=()=>{if(callback)callback();};
+  speechSynthesis.speak(u);
+}
+
+function bingoPause() {
+  if(!bingoActief)return;
+  if(bingoPauzeActief){
+    // Hervatten
+    bingoStart();
+  } else {
+    // Pauzeren
+    bingoPauzeActief=true;
+    clearTimeout(bingoTimer);
+    document.getElementById('b-pause').textContent='▶ Hervatten';
+    document.getElementById('b-paused').classList.add('show');
+    document.getElementById('b-bar').style.transition='none';
+    document.getElementById('b-bar').style.width='0%';
+  }
+}
+
+function bingoStop() {
+  bingoActief=false;bingoPauzeActief=false;bingoGestart=false;
+  clearTimeout(bingoTimer);
+  speechSynthesis.cancel();
+  document.getElementById('b-num').textContent='—';
+  document.getElementById('b-ordinal').textContent='Gestopt';
+  document.getElementById('b-paused').classList.remove('show');
+  document.getElementById('b-bar').style.width='0%';
+  updateBingoButtons();
+  toast('Bingo sessie gestopt');
+}
+
+function updateBingoButtons() {
+  const start=document.getElementById('b-start');
+  const pause=document.getElementById('b-pause');
+  const stop=document.getElementById('b-stop');
+  if(!bingoGestart){
+    start.textContent='▶ Start sessie';start.disabled=false;
+    pause.disabled=true;pause.textContent='⏸ Pauzeer';
+    stop.disabled=true;
+  } else if(bingoPauzeActief){
+    start.textContent='▶ Hervatten';start.disabled=false;
+    pause.disabled=false;pause.textContent='▶ Hervatten';
+    stop.disabled=false;
+  } else {
+    start.textContent='▶ Bezig…';start.disabled=true;
+    pause.disabled=false;pause.textContent='⏸ Pauzeer';
+    stop.disabled=false;
+  }
 }
 
 // =====================================================
