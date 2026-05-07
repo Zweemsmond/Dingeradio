@@ -456,6 +456,8 @@ function autoBlok(){
 
 function togglePlay(){
   const btn=document.getElementById('btn-play');
+  // Opwarm de AudioContext bij eerste gebruikersinteractie
+  getAudioCtx();
   if(speelt){audio.pause();speelt=false;btn.textContent='▶';btn.classList.remove('playing');}
   else{speelt=true;btn.textContent='⏸';btn.classList.add('playing');laadEnSpeel();}
 }
@@ -982,9 +984,18 @@ const GELUIDEN={
   geen: ()=>{}, // stil
 };
 
+// Persistente AudioContext — voorkomt browser-blokkade bij automatische geluiden
+let audioCtx = null;
+
+function getAudioCtx() {
+  if(!audioCtx) audioCtx = new(window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
 function speelGeluid(naam){
   try{
-    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const ctx = getAudioCtx();
     const fn=GELUIDEN[naam||geluidsKeuze];
     if(fn)fn(ctx);
   }catch(e){console.warn('Geluid mislukt:',e);}
