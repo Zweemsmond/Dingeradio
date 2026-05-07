@@ -896,7 +896,20 @@ function _openTab(n){
   document.getElementById('panel-'+n).classList.add('active');
   if(n==='beheer')bouwBeheer();
   if(n==='muziek')bouwMuziekPanel();
-  if(n==='bingo'){bouwBingoGrid();updateBingoButtons();}
+  if(n==='bingo'){
+    bouwBingoGrid();
+    updateBingoButtons();
+    // Herstel stats en huidig getal als sessie bezig is
+    if(bingoGestart && bingoIdx > 0){
+      const huidig = bingoGetallen[bingoIdx-1];
+      const ordinal = ORDINALS[bingoIdx-1] || `nummer ${bingoIdx}`;
+      document.getElementById('b-num').textContent = huidig;
+      document.getElementById('b-ordinal').textContent = 'Het '+ordinal+' getal';
+      document.getElementById('b-count').textContent = bingoIdx;
+      document.getElementById('b-rest').textContent = 75-bingoIdx;
+    }
+    if(bingoPauzeActief) document.getElementById('b-paused').classList.add('show');
+  }
 }
 
 // =====================================================
@@ -1041,6 +1054,17 @@ function bouwBingoGrid() {
     el.className='bc';el.id='bc-'+i;el.textContent=i;
     grid.appendChild(el);
   }
+  // Herstel de staat van al omgeroepen getallen
+  const omgeroepen = bingoGetallen.slice(0, bingoIdx);
+  omgeroepen.forEach((getal, i) => {
+    const cel = document.getElementById('bc-'+getal);
+    if(!cel) return;
+    if(i === omgeroepen.length - 1) {
+      cel.classList.add('latest'); // laatste getal goudkleurig
+    } else {
+      cel.classList.add('called'); // eerder omgeroepen
+    }
+  });
 }
 
 function bingoStart() {
